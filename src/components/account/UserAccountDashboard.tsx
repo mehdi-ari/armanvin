@@ -4,9 +4,10 @@ import {
   Headphones, User, LogOut, ArrowLeft, Star, Sparkles, Check, ChevronDown, 
   ChevronUp, Send, Copy, AlertCircle, Compass, Flame, Shield, RefreshCw,
   Play, Pause, Plus, Clock, ExternalLink, Calendar, MapPin, CheckCircle2,
-  FileText, ArrowUpRight, MessageSquare, Award, CreditCard, Filter
+  FileText, ArrowUpRight, MessageSquare, Award, CreditCard, Filter, LayoutGrid,
+  Columns, Layers, MonitorPlay, Zap
 } from 'lucide-react';
-import { MINI_COURSES_DATA, MiniCourse, Lesson } from '../../data/miniCoursesData';
+import { MINI_COURSES_DATA, MiniCourse } from '../../data/miniCoursesData';
 
 export type AccountTabId = 
   | 'dashboard'
@@ -21,11 +22,11 @@ export type AccountTabId =
   | 'support'
   | 'profile';
 
-export type UserDesignVariant = 
-  | 'authentic-original'    // ۱. طرح اصلی شما (تطابق کامل و ۱:۱ با اسکرین‌شات)
-  | 'interactive-expanded'  // ۲. طرح تعاملی (کارت‌های بازشونده بر پایه طرح شما)
-  | 'crystal-glass'         // ۳. طرح کریستالی مات و لوکس (گلس‌مورفیک تیره با همان چیدمان)
-  | 'embedded-chart';       // ۴. طرح با ویجت زنده چارت ناتال و ترانزیت
+export type UserDesignComposition = 
+  | 'classic-stacked'   // ۱. ترکیب کلاسیک ستونی (عین اسکرین‌شات شما)
+  | 'bento-grid'        // ۲. ترکیب بنتو گرید مدرن (کارت‌های ۲ ستونه هوشمند)
+  | 'tri-pillars'       // ۳. ترکیب سه‌ساحت اختصاصی آرمان‌وین (آسمان، تن و مزاج، روان)
+  | 'cockpit-command';  // ۴. ترکیب کابین خلبانی (داشبورد مأموریت و اکشن متمرکز)
 
 interface UserAccountDashboardProps {
   onLogout?: () => void;
@@ -36,14 +37,11 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
   onLogout,
   onNavigateToCourse,
 }) => {
-  // Selected variant (default is the user's exact original design)
-  const [selectedVariant, setSelectedVariant] = useState<UserDesignVariant>('authentic-original');
+  // Selected composition (default is the user's exact original design)
+  const [activeComposition, setActiveComposition] = useState<UserDesignComposition>('classic-stacked');
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<AccountTabId>('dashboard');
-
-  // Expandable cards state for variant 2
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Quick AI in-card prompt state
   const [quickAiQuestion, setQuickAiQuestion] = useState('');
@@ -95,6 +93,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       points: 15,
       done: false,
       hrefText: 'برو',
+      category: 'آسمان',
     },
     {
       id: 'ai',
@@ -102,6 +101,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       points: 15,
       done: false,
       hrefText: 'برو',
+      category: 'روان',
     },
     {
       id: 'consult',
@@ -109,6 +109,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       points: 200,
       done: false,
       hrefText: 'برو',
+      category: 'آسمان',
     },
     {
       id: 'horoscope',
@@ -116,6 +117,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       points: 10,
       done: false,
       hrefText: 'برو',
+      category: 'آسمان',
     },
     {
       id: 'streak',
@@ -123,6 +125,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       points: 25,
       done: false,
       hrefText: 'برو',
+      category: 'باشگاه',
     },
     {
       id: 'profile-complete',
@@ -130,6 +133,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       points: 30,
       done: true,
       hrefText: 'انجام شد',
+      category: 'تن و مزاج',
     },
     {
       id: 'invite-friend',
@@ -137,6 +141,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       points: 50,
       done: false,
       hrefText: 'برو',
+      category: 'باشگاه',
     },
   ]);
 
@@ -209,7 +214,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       amount: 'رایگان / هدیه عضویت',
       status: 'فعال و تکمیل شده',
       date: '۱۴۰۳/۰۷/۱۰',
-      downloadUrl: '#'
     },
     {
       id: 'ORD-8819',
@@ -217,12 +221,8 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       amount: 'اعتبار رایگان خوش‌آمدگویی',
       status: 'پردازش‌شده',
       date: '۱۴۰۳/۰۷/۱۲',
-      downloadUrl: '#'
     }
   ]);
-
-  // Embedded Chart view toggle: natal vs transit
-  const [chartMode, setChartMode] = useState<'natal' | 'transit'>('natal');
 
   // Active Mini Audio Playing state
   const [activeCourseAudio, setActiveCourseAudio] = useState<MiniCourse | null>(null);
@@ -256,7 +256,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
   const handleSubmitTicket = () => {
     if (!newTicketTitle.trim()) return;
-    const newT = {
+    const newT: TicketItem = {
       id: `TCK-${Math.floor(1000 + Math.random() * 9000)}`,
       title: newTicketTitle,
       category: newTicketCategory,
@@ -288,7 +288,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
       }
       setQuickAiAnswer(ans);
       setIsAiLoading(false);
-    }, 600);
+    }, 500);
   };
 
   const handleSendFullAiChat = () => {
@@ -308,7 +308,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
           time: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
         }
       ]);
-    }, 700);
+    }, 600);
   };
 
   const handleCreateChart = () => {
@@ -358,64 +358,96 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
     { id: 'profile', label: 'اطلاعات حساب', icon: User },
   ];
 
-  // Card style classes based on variant
-  const getCardClasses = () => {
-    if (selectedVariant === 'crystal-glass') {
-      return 'bg-[#071312]/80 backdrop-blur-xl border border-[#43C6AC]/30 shadow-[0_12px_40px_rgba(0,0,0,0.6)] relative overflow-hidden';
-    }
-    return 'bg-[#071312] border border-[#142824] shadow-md';
-  };
+  const compositionsList = [
+    { 
+      id: 'classic-stacked', 
+      title: '۱. ترکیب کلاسیک ستونی', 
+      desc: 'تطابق کامل ۱:۱ با چینش اسکرین‌شات شما',
+      icon: Layers,
+      badge: 'طرح اصلی شما'
+    },
+    { 
+      id: 'bento-grid', 
+      title: '۲. ترکیب بنتو گرید مدرن', 
+      desc: 'چینش شبکه‌ای هوشمند با کارت‌های تحلیلی و آماری شاخص',
+      icon: LayoutGrid,
+      badge: 'شبکه‌ای هوشمند'
+    },
+    { 
+      id: 'tri-pillars', 
+      title: '۳. ترکیب سه‌ساحت آرمان‌وین', 
+      desc: 'دسته‌بندی ارکان سایت در ۳ ستون: آسمان | تن و مزاج | روان',
+      icon: Columns,
+      badge: 'آسمان · مزاج · روان'
+    },
+    { 
+      id: 'cockpit-command', 
+      title: '۴. ترکیب کابین خلبانی', 
+      desc: 'مرکز متمرکز مأموریت‌های روزانه، چالش‌ها و اقدام سریع',
+      icon: Zap,
+      badge: 'گیمیفیکیشن و اقدام'
+    },
+  ];
 
   return (
     <div className="w-full min-h-[calc(100vh-140px)] bg-[#040909] text-[#F3EFE6] py-4 sm:py-8 px-3 sm:px-6 select-none font-sans" dir="rtl">
       <div className="max-w-[1020px] mx-auto space-y-4">
         
         {/* ========================================================================= */}
-        {/* VARIANT SELECTOR BAR (BUILT DIRECTLY RELATIVE TO YOUR AUTHENTIC DESIGN)   */}
+        {/* PROMINENT COMPOSITION SWITCHER: CLEAR, DRAMATIC, HIGH-IMPACT SELECTION     */}
         {/* ========================================================================= */}
-        <div className="w-full bg-[#071312] border border-[#142824] rounded-2xl p-2.5 sm:px-4 sm:py-2.5 flex flex-col md:flex-row items-center justify-between gap-3 text-right">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="w-2 h-2 rounded-full bg-[#43C6AC] animate-pulse" />
-            <span className="font-bold text-white">طرح‌های ساخته‌شده بر پایه طرح اختصاصی شما:</span>
+        <div className="w-full bg-[#071312] border-2 border-[#1E433C] rounded-2xl p-3 sm:p-4 shadow-xl space-y-3 text-right">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#142824] pb-2.5">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#43C6AC] animate-ping" />
+              <h2 className="text-xs sm:text-sm font-extrabold text-white">
+                تغییر چیدمان و ترکیب داشبورد (بر پایه محتوای طرح اختصاصی شما):
+              </h2>
+            </div>
+            <span className="text-[11px] text-[#43C6AC] font-mono bg-[#09221E] px-2.5 py-0.5 rounded-full border border-[#164C42]">
+              ترکیب فعال: {compositionsList.find(c => c.id === activeComposition)?.badge}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 md:pb-0 scrollbar-none">
-            {[
-              { id: 'authentic-original', label: '۱. طرح اصلی (تطابق کامل ۱:۱)', badge: 'مرجع' },
-              { id: 'interactive-expanded', label: '۲. نسخه تعاملی (کارت‌های بازشونده)', badge: 'اکشن درجا' },
-              { id: 'crystal-glass', label: '۳. نسخه کریستالی مات و لوکس', badge: 'گلس‌مورفیک' },
-              { id: 'embedded-chart', label: '۴. نسخه مجهز به ویجت زنده چارت', badge: 'چارت ناتال' },
-            ].map((v) => {
-              const active = selectedVariant === v.id;
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            {compositionsList.map((comp) => {
+              const CompIcon = comp.icon;
+              const isActive = activeComposition === comp.id;
               return (
                 <button
-                  key={v.id}
-                  onClick={() => setSelectedVariant(v.id as UserDesignVariant)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
-                    active
-                      ? 'bg-[#097565] text-white shadow-sm ring-1 ring-[#43C6AC]/50'
-                      : 'bg-[#06100F] hover:bg-[#0C1E1B] text-[#A9BAB4] hover:text-white border border-[#142824]'
+                  key={comp.id}
+                  onClick={() => setActiveComposition(comp.id as UserDesignComposition)}
+                  className={`p-3 rounded-xl text-right transition cursor-pointer flex flex-col justify-between gap-2 relative overflow-hidden border ${
+                    isActive
+                      ? 'bg-gradient-to-br from-[#0B2520] to-[#071715] border-[#43C6AC] ring-2 ring-[#43C6AC]/40 shadow-[0_0_20px_rgba(67,198,172,0.25)]'
+                      : 'bg-[#06100F] hover:bg-[#0B1E1B] border-[#142824] hover:border-[#1E433C]'
                   }`}
                 >
-                  <span className="whitespace-nowrap">{v.label}</span>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${isActive ? 'bg-[#097565] text-white' : 'bg-[#0A1A18] text-[#8BA19B]'}`}>
+                      {comp.badge}
+                    </span>
+                    <CompIcon className={`w-4 h-4 ${isActive ? 'text-[#43C6AC]' : 'text-[#8BA19B]'}`} />
+                  </div>
+
+                  <div>
+                    <span className={`text-xs font-bold block ${isActive ? 'text-white' : 'text-[#A9BAB4]'}`}>
+                      {comp.title}
+                    </span>
+                    <span className="text-[10px] text-[#8BA19B] line-clamp-1 block mt-0.5">
+                      {comp.desc}
+                    </span>
+                  </div>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Ambient background glow for crystal-glass variant */}
-        {selectedVariant === 'crystal-glass' && (
-          <div className="relative">
-            <div className="absolute -top-10 right-1/4 w-96 h-40 bg-[#43C6AC]/10 blur-[100px] pointer-events-none rounded-full" />
-            <div className="absolute top-20 left-10 w-72 h-48 bg-[#D4B483]/10 blur-[90px] pointer-events-none rounded-full" />
-          </div>
-        )}
-
         {/* ========================================================================= */}
         {/* TOP USER CARD (.acct-head) matching image.png                             */}
         {/* ========================================================================= */}
-        <div className={`rounded-2xl sm:rounded-3xl p-5 sm:p-6 relative overflow-hidden ${getCardClasses()}`}>
+        <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-[#071312] border border-[#142824] shadow-md relative overflow-hidden">
           <div className="flex items-center justify-between gap-4">
             
             {/* User Greeting & Wealth Bar */}
@@ -487,402 +519,681 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-4 items-start">
           
           {/* ======================================================================= */}
-          {/* LEFT COLUMN: ACTIVE CONTENT CARDS                                       */}
+          {/* LEFT COLUMN: ACTIVE CONTENT (RESPONDS DIRECTLY TO COMPOSITION SWITCHER) */}
           {/* ======================================================================= */}
-          <div className="space-y-3.5 order-2 lg:order-1">
+          <div className="space-y-4 order-2 lg:order-1">
             
             {activeTab === 'dashboard' && (
-              <div className="space-y-3.5 animate-fade-in text-right">
+              <div className="space-y-4 animate-fade-in text-right">
                 
-                {/* 1. Hero Card: پنل پرونده شخصی */}
-                <div className={`rounded-2xl p-5 sm:p-6 transition-all ${getCardClasses()}`}>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    
-                    {/* Left button in RTL layout */}
-                    <button
-                      onClick={() => {
-                        if (selectedVariant === 'interactive-expanded') {
-                          setExpandedCard(expandedCard === 'portal' ? null : 'portal');
-                        } else {
-                          setActiveTab('portal');
-                        }
-                      }}
-                      className="order-2 sm:order-1 px-5 py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(9,117,101,0.4)] transition cursor-pointer flex items-center justify-center gap-2 shrink-0 self-start sm:self-auto"
-                    >
-                      <span>ورود به پنل پرونده شخصی ←</span>
-                    </button>
+                {/* ----------------------------------------------------------------- */}
+                {/* COMPOSITION 1: CLASSIC STACKED (تطابق کامل ۱:۱ با اسکرین‌شات شما) */}
+                {/* ----------------------------------------------------------------- */}
+                {activeComposition === 'classic-stacked' && (
+                  <div className="space-y-3.5">
+                    {/* 1. Hero Card: پنل پرونده شخصی */}
+                    <div className="rounded-2xl p-5 sm:p-6 bg-[#071312] border border-[#142824] shadow-md">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <button
+                          onClick={() => setActiveTab('portal')}
+                          className="order-2 sm:order-1 px-5 py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(9,117,101,0.4)] transition cursor-pointer flex items-center justify-center gap-2 shrink-0 self-start sm:self-auto"
+                        >
+                          <span>ورود به پنل پرونده شخصی ←</span>
+                        </button>
 
-                    {/* Right text */}
-                    <div className="order-1 sm:order-2 space-y-1 text-right">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 text-[10px] font-bold">فعال</span>
-                        <h2 className="text-base sm:text-lg font-bold text-white font-serif">
-                          پنل پرونده شخصی
-                        </h2>
-                      </div>
-                      <p className="text-xs sm:text-sm text-[#8BA19B] font-light leading-relaxed">
-                        چهار بخش پرونده، پیام مشاور و هماهنگی جلسه — همه در یک‌جا.
-                      </p>
-                    </div>
-
-                  </div>
-
-                  {/* Expanded view for variant 2 */}
-                  {selectedVariant === 'interactive-expanded' && expandedCard === 'portal' && (
-                    <div className="mt-4 pt-4 border-t border-[#142824] grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300 animate-fade-in">
-                      <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1">
-                        <span className="text-[#43C6AC] font-bold">بخش ۱: پرونده طبع و مزاج</span>
-                        <p className="text-[11px] text-[#8BA19B]">طبع سرشتی: {userData.temperament}</p>
-                      </div>
-                      <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1">
-                        <span className="text-[#43C6AC] font-bold">بخش ۲: چارت ناتال تولد</span>
-                        <p className="text-[11px] text-[#8BA19B]">{userData.sunSign} · طالع {userData.ascendant} · {userData.birthCity}</p>
-                      </div>
-                      <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1">
-                        <span className="text-[#43C6AC] font-bold">بخش ۳: کهن‌الگو و روانشناسی</span>
-                        <p className="text-[11px] text-[#8BA19B]">کهن‌الگوی فعال: جوینده و خردمند (سایه در حال گذار)</p>
-                      </div>
-                      <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1">
-                        <span className="text-[#43C6AC] font-bold">بخش ۴: هماهنگی جلسه مشاوره</span>
-                        <p className="text-[11px] text-[#8BA19B]">وضعیت: پرونده آماده بررسی مشاور ارشد</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* 2. Quickstart Card: از کجا شروع کنم؟ */}
-                <div className={`rounded-2xl p-5 transition-all ${getCardClasses()}`}>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    
-                    {/* Button on the left */}
-                    <button
-                      onClick={() => {
-                        if (selectedVariant === 'interactive-expanded') {
-                          setExpandedCard(expandedCard === 'guide' ? null : 'guide');
-                        } else {
-                          setActiveTab('courses');
-                        }
-                      }}
-                      className="order-2 sm:order-1 px-4 py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold shadow-[0_0_15px_rgba(9,117,101,0.3)] transition cursor-pointer shrink-0 self-start sm:self-auto"
-                    >
-                      <span>شروع سریع در راهنمای آرمانوین</span>
-                    </button>
-
-                    {/* Text on the right */}
-                    <div className="order-1 sm:order-2 space-y-1 text-right">
-                      <h3 className="text-sm sm:text-base font-bold text-white">
-                        از کجا شروع کنم؟
-                      </h3>
-                      <p className="text-xs text-[#8BA19B] font-light leading-relaxed">
-                        راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره، با نقشۀ دکمه‌ها.
-                      </p>
-                    </div>
-
-                  </div>
-
-                  {/* Expanded view for variant 2 */}
-                  {selectedVariant === 'interactive-expanded' && expandedCard === 'guide' && (
-                    <div className="mt-4 pt-4 border-t border-[#142824] space-y-2 text-xs text-slate-300 animate-fade-in">
-                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-center">
-                        <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824]">
-                          <span className="text-[#43C6AC] font-bold block mb-1">گام اول</span>
-                          <span className="text-[11px] text-slate-300">تکمیل پروفایل و تولد</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824]">
-                          <span className="text-[#43C6AC] font-bold block mb-1">گام دوم</span>
-                          <span className="text-[11px] text-slate-300">مشاهده نقشه آسمان</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824]">
-                          <span className="text-[#43C6AC] font-bold block mb-1">گام سوم</span>
-                          <span className="text-[11px] text-slate-300">پرسش از آرماهوش</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824]">
-                          <span className="text-[#43C6AC] font-bold block mb-1">گام چهارم</span>
-                          <span className="text-[11px] text-slate-300">ارسال پرونده مشاوره</span>
+                        <div className="order-1 sm:order-2 space-y-1 text-right">
+                          <h2 className="text-base sm:text-lg font-bold text-white font-serif">
+                            پنل پرونده شخصی
+                          </h2>
+                          <p className="text-xs sm:text-sm text-[#8BA19B] font-light leading-relaxed">
+                            چهار بخش پرونده، پیام مشاور و هماهنگی جلسه — همه در یک‌جا.
+                          </p>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* 3. Next Action Card: الان آرماهوش را روی چارتت باز کن */}
-                <div className={`rounded-2xl p-5 transition-all ${getCardClasses()}`}>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    
-                    {/* Button on the left */}
-                    <button
-                      onClick={() => {
-                        if (selectedVariant === 'interactive-expanded') {
-                          setExpandedCard(expandedCard === 'ai' ? null : 'ai');
-                        } else {
-                          setActiveTab('ai');
-                        }
-                      }}
-                      className="order-2 sm:order-1 px-5 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold shadow-[0_0_15px_rgba(9,117,101,0.3)] transition cursor-pointer shrink-0 self-start sm:self-auto"
-                    >
-                      <span>برو</span>
-                    </button>
+                    {/* 2. Quickstart Card: از کجا شروع کنم؟ */}
+                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <button
+                          onClick={() => setActiveTab('courses')}
+                          className="order-2 sm:order-1 px-4 py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold shadow-[0_0_15px_rgba(9,117,101,0.3)] transition cursor-pointer shrink-0 self-start sm:self-auto"
+                        >
+                          <span>شروع سریع در راهنمای آرمانوین</span>
+                        </button>
 
-                    {/* Text on the right */}
-                    <div className="order-1 sm:order-2 space-y-1 text-right">
-                      <h3 className="text-sm sm:text-base font-bold text-white">
-                        الان آرماهوش را روی چارتت باز کن
-                      </h3>
-                      <p className="text-xs text-[#8BA19B] font-light leading-relaxed">
-                        سه لایۀ روان، مزاج و آسمان روی همین صفحه جمع می‌شود.
-                      </p>
+                        <div className="order-1 sm:order-2 space-y-1 text-right">
+                          <h3 className="text-sm sm:text-base font-bold text-white">
+                            از کجا شروع کنم؟
+                          </h3>
+                          <p className="text-xs text-[#8BA19B] font-light leading-relaxed">
+                            راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره، با نقشۀ دکمه‌ها.
+                          </p>
+                        </div>
+                      </div>
                     </div>
 
-                  </div>
+                    {/* 3. Next Action Card: الان آرماهوش را روی چارتت باز کن */}
+                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <button
+                          onClick={() => setActiveTab('ai')}
+                          className="order-2 sm:order-1 px-5 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold shadow-[0_0_15px_rgba(9,117,101,0.3)] transition cursor-pointer shrink-0 self-start sm:self-auto"
+                        >
+                          <span>برو</span>
+                        </button>
 
-                  {/* Expanded view for variant 2: interactive prompt chips */}
-                  {selectedVariant === 'interactive-expanded' && expandedCard === 'ai' && (
-                    <div className="mt-4 pt-4 border-t border-[#142824] space-y-3 text-xs text-slate-300 animate-fade-in">
-                      <p className="text-[#8BA19B]">پرسش سریع از آرماهوش روی چارت ناتال {userData.displayName}:</p>
-                      
-                      {/* Predefined prompt chips */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {[
-                          '⚡ تحلیل ترانزیت کواکب امروز',
-                          '🌿 توصیه مزاجی من برای این فصل',
-                          '🪐 سیاره حاکم بر چارت من چه پیامی دارد؟'
-                        ].map((chip, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleQuickAskAi(chip)}
-                            className="px-2.5 py-1 rounded-lg bg-[#081816] hover:bg-[#0E2824] text-[#43C6AC] border border-[#164239] text-[11px] transition cursor-pointer"
+                        <div className="order-1 sm:order-2 space-y-1 text-right">
+                          <h3 className="text-sm sm:text-base font-bold text-white">
+                            الان آرماهوش را روی چارتت باز کن
+                          </h3>
+                          <p className="text-xs text-[#8BA19B] font-light leading-relaxed">
+                            سه لایۀ روان، مزاج و آسمان روی همین صفحه جمع می‌شود.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. Stat Chips Bar matching image.png */}
+                    <div className="rounded-2xl p-3.5 sm:p-4 bg-[#071312] border border-[#142824] shadow-md flex flex-wrap items-center justify-start gap-2">
+                      <span className="px-3.5 py-1.5 rounded-full bg-[#09221E] border border-[#164C42] text-[#43C6AC] text-xs font-bold flex items-center gap-1.5">
+                        <b className="font-mono">{userData.chartsCount}</b>
+                        <span>تحلیل ساخته‌شده</span>
+                      </span>
+
+                      <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs font-medium flex items-center gap-1.5">
+                        <b className="font-mono text-emerald-400">{userData.clubPoints}</b>
+                        <span>امتیاز باشگاه</span>
+                      </span>
+
+                      <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#D4B483] text-xs font-medium">
+                        رتبهٔ {userData.tier}
+                      </span>
+
+                      <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs flex items-center gap-1.5">
+                        <b className="font-mono text-white">{userData.aiCount}</b>
+                        <span>پرسش هوش مصنوعی</span>
+                      </span>
+
+                      <span className="px-3 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#8BA19B] text-xs font-mono">
+                        □ …
+                      </span>
+
+                      <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs flex items-center gap-1.5">
+                        <b className="font-mono text-white">{userData.invitedCount}</b>
+                        <span>دعوت موفق</span>
+                      </span>
+                    </div>
+
+                    {/* 5. Missions Section: ★ مأموریت‌های تو */}
+                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md space-y-3">
+                      <div className="flex items-center justify-between pb-1">
+                        <span className="text-[11px] text-[#8BA19B]">
+                          با انجام هر مأموریت امتیاز باشگاه دریافت کنید
+                        </span>
+
+                        <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                          <span>★ مأموریت‌های تو</span>
+                        </h3>
+                      </div>
+
+                      <div className="space-y-2">
+                        {missions.map((m) => (
+                          <div
+                            key={m.id}
+                            className={`p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
+                              m.done 
+                                ? 'bg-[#091D1A]/50 border-emerald-900/60 opacity-80' 
+                                : 'bg-[#06100F] border-[#122421] hover:border-[#1E3B34]'
+                            }`}
                           >
-                            {chip}
-                          </button>
+                            <button
+                              onClick={() => handleToggleMission(m.id)}
+                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer shrink-0 border ${
+                                m.done 
+                                  ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' 
+                                  : 'bg-[#081514] hover:bg-[#0E201E] text-white border-[#19322D]'
+                              }`}
+                            >
+                              {m.done ? 'انجام شد ✓' : m.hrefText}
+                            </button>
+
+                            <div className="flex items-center gap-3 text-right">
+                              <span className="text-xs font-bold text-[#43C6AC] font-mono">
+                                {m.points}+
+                              </span>
+                              <span className={`text-xs sm:text-[13px] ${m.done ? 'line-through text-slate-400' : 'text-[#E8E2D5]'}`}>
+                                {m.title}
+                              </span>
+                              <span className="text-sm">
+                                {m.done ? '✓' : '□'}
+                              </span>
+                            </div>
+                          </div>
                         ))}
                       </div>
-
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={quickAiQuestion}
-                          onChange={(e) => setQuickAiQuestion(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleQuickAskAi()}
-                          placeholder="سؤال خود را درباره چارت یا مزاج بنویسید..."
-                          className="flex-1 bg-[#06100F] border border-[#142824] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#43C6AC] text-right"
-                        />
-                        <button
-                          onClick={() => handleQuickAskAi()}
-                          disabled={isAiLoading}
-                          className="px-4 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold cursor-pointer disabled:opacity-50"
-                        >
-                          {isAiLoading ? '...' : 'ارسال'}
-                        </button>
-                      </div>
-
-                      {quickAiAnswer && (
-                        <div className="p-3 rounded-xl bg-[#081C18] border border-[#1E4D43] text-xs text-[#A9BAB4] leading-relaxed animate-fade-in">
-                          <strong className="block text-[#43C6AC] mb-1">پاسخ تحلیلی آرماهوش:</strong>
-                          {quickAiAnswer}
-                        </div>
-                      )}
                     </div>
-                  )}
-                </div>
-
-                {/* 4. Stat Chips Bar matching image.png */}
-                <div className={`rounded-2xl p-3.5 sm:p-4 flex flex-wrap items-center justify-start gap-2 ${getCardClasses()}`}>
-                  <button 
-                    onClick={() => setActiveTab('charts')}
-                    className="px-3.5 py-1.5 rounded-full bg-[#09221E] border border-[#164C42] text-[#43C6AC] text-xs font-bold flex items-center gap-1.5 hover:bg-[#0F352E] transition cursor-pointer"
-                  >
-                    <b className="font-mono">{userData.chartsCount}</b>
-                    <span>تحلیل ساخته‌شده</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('club')}
-                    className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs font-medium flex items-center gap-1.5 hover:text-white transition cursor-pointer"
-                  >
-                    <b className="font-mono text-emerald-400">{userData.clubPoints}</b>
-                    <span>امتیاز باشگاه</span>
-                  </button>
-
-                  <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#D4B483] text-xs font-medium">
-                    رتبهٔ {userData.tier}
-                  </span>
-
-                  <button 
-                    onClick={() => setActiveTab('ai')}
-                    className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs flex items-center gap-1.5 hover:text-white transition cursor-pointer"
-                  >
-                    <b className="font-mono text-white">{userData.aiCount}</b>
-                    <span>پرسش هوش مصنوعی</span>
-                  </button>
-
-                  {/* Forth Chip: Meaningful Daily Streak Pill matching geometry */}
-                  <span className="px-3 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#8BA19B] text-xs flex items-center gap-1">
-                    <span className="text-amber-400">🔥</span>
-                    <span>استریک: {userData.streakDays} روز</span>
-                  </span>
-
-                  <button 
-                    onClick={() => setActiveTab('income')}
-                    className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs flex items-center gap-1.5 hover:text-white transition cursor-pointer"
-                  >
-                    <b className="font-mono text-white">{userData.invitedCount}</b>
-                    <span>دعوت موفق</span>
-                  </button>
-                </div>
-
-                {/* Optional Variant 4: Live Interactive Astrological Zodiac & Natal Widget */}
-                {selectedVariant === 'embedded-chart' && (
-                  <div className={`rounded-2xl p-5 space-y-4 animate-fade-in ${getCardClasses()}`}>
-                    <div className="flex items-center justify-between pb-2 border-b border-[#142824]">
-                      <div className="flex items-center gap-1.5 bg-[#06100F] p-1 rounded-xl border border-[#142824]">
-                        <button
-                          onClick={() => setChartMode('natal')}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
-                            chartMode === 'natal' ? 'bg-[#097565] text-white' : 'text-[#8BA19B]'
-                          }`}
-                        >
-                          چارت ناتال تولد
-                        </button>
-                        <button
-                          onClick={() => setChartMode('transit')}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
-                            chartMode === 'transit' ? 'bg-[#097565] text-white' : 'text-[#8BA19B]'
-                          }`}
-                        >
-                          ترانزیت‌های لحظه‌ای کواکب
-                        </button>
-                      </div>
-
-                      <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                        <Compass className="w-4 h-4 text-[#43C6AC]" />
-                        <span>نقشه آسمان ناتال {userData.displayName}</span>
-                      </h4>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                      <div className="p-3.5 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-right">
-                        <span className="text-[#8BA19B]">برج خورشیدی (Sun Sign):</span>
-                        <p className="font-bold text-[#43C6AC] text-sm">{userData.sunSign}</p>
-                        <p className="text-[10px] text-slate-400">نماد هویت، اراده بنیادین و نشاط حیاتی</p>
-                      </div>
-
-                      <div className="p-3.5 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-right">
-                        <span className="text-[#8BA19B]">طالع صعودی (Ascendant):</span>
-                        <p className="font-bold text-white text-sm">{userData.ascendant}</p>
-                        <p className="text-[10px] text-slate-400">لایه بیرونی شخصیت، رفتار و جلوه اجتماعی</p>
-                      </div>
-
-                      <div className="p-3.5 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-right">
-                        <span className="text-[#8BA19B]">برج ماه و سیاره حاکم:</span>
-                        <p className="font-bold text-[#D4B483] text-sm">{userData.moonSign}</p>
-                        <p className="text-[10px] text-slate-400">حاکم طالع: {userData.rulerPlanet}</p>
-                      </div>
-                    </div>
-
-                    {/* Interactive Planetary Positions Matrix */}
-                    <div className="p-3.5 rounded-xl bg-[#06100F] border border-[#142824] space-y-2">
-                      <div className="flex items-center justify-between text-xs text-[#8BA19B]">
-                        <span>موقعیت کواکب ده‌گانه در لحظه تولد:</span>
-                        <span className="text-[#43C6AC] font-mono">{userData.birthDate} - {userData.birthTime}</span>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        <div className="p-2 rounded-lg bg-[#081816] border border-[#164239] text-center">
-                          <span className="text-[#43C6AC] font-bold block">☉ خورشید</span>
-                          <span className="text-[11px] text-slate-300">در اسد ۲۵°</span>
-                        </div>
-                        <div className="p-2 rounded-lg bg-[#081816] border border-[#164239] text-center">
-                          <span className="text-[#38BDF8] font-bold block">☽ ماه</span>
-                          <span className="text-[11px] text-slate-300">در حوت ۱۲°</span>
-                        </div>
-                        <div className="p-2 rounded-lg bg-[#081816] border border-[#164239] text-center">
-                          <span className="text-[#D4B483] font-bold block">☿ عطارد</span>
-                          <span className="text-[11px] text-slate-300">در سنبله ۰۸°</span>
-                        </div>
-                        <div className="p-2 rounded-lg bg-[#081816] border border-[#164239] text-center">
-                          <span className="text-rose-400 font-bold block">♂ مریخ</span>
-                          <span className="text-[11px] text-slate-300">در حمل ۱۸°</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => setActiveTab('charts')}
-                      className="w-full py-2.5 rounded-xl bg-[#081716] hover:bg-[#0E2421] text-xs font-bold text-[#43C6AC] border border-[#1D3B35] transition cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <span>مشاهده جزییات دایره‌البروج و زوایای کامل</span>
-                      <ArrowLeft className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 )}
 
-                {/* 5. Missions Section: ★ مأموریت‌های تو */}
-                <div className={`rounded-2xl p-5 space-y-3 ${getCardClasses()}`}>
-                  <div className="flex items-center justify-between pb-1">
-                    <span className="text-[11px] text-[#8BA19B]">
-                      با انجام هر مأموریت امتیاز باشگاه دریافت کنید
-                    </span>
-
-                    <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                      <span>★ مأموریت‌های تو</span>
-                    </h3>
-                  </div>
-
-                  <div className="space-y-2">
-                    {missions.map((m) => (
-                      <div
-                        key={m.id}
-                        className={`p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
-                          m.done 
-                            ? 'bg-[#091D1A]/50 border-emerald-900/60 opacity-80' 
-                            : 'bg-[#06100F] border-[#122421] hover:border-[#1E3B34]'
-                        }`}
-                      >
-                        {/* Button on the left */}
-                        <button
-                          onClick={() => handleToggleMission(m.id)}
-                          className={`px-4 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer shrink-0 border ${
-                            m.done 
-                              ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' 
-                              : 'bg-[#081514] hover:bg-[#0E201E] text-white border-[#19322D]'
-                          }`}
-                        >
-                          {m.done ? 'انجام شد ✓' : m.hrefText}
-                        </button>
-
-                        {/* Title and points on the right */}
-                        <div className="flex items-center gap-3 text-right">
-                          <span className="text-xs font-bold text-[#43C6AC] font-mono">
-                            {m.points}+
-                          </span>
-                          <span className={`text-xs sm:text-[13px] ${m.done ? 'line-through text-slate-400' : 'text-[#E8E2D5]'}`}>
-                            {m.title}
-                          </span>
-                          <span className="text-sm">
-                            {m.done ? '✓' : '□'}
-                          </span>
+                {/* ----------------------------------------------------------------- */}
+                {/* COMPOSITION 2: BENTO GRID (چیدمان شبکه‌ای مدرن و ۲ ستونه)          */}
+                {/* ----------------------------------------------------------------- */}
+                {activeComposition === 'bento-grid' && (
+                  <div className="space-y-3.5 animate-fade-in">
+                    
+                    {/* Top Row: 4 Metric Cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1">
+                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1">
+                          <Eye className="w-3.5 h-3.5 text-[#43C6AC]" />
+                          <span>تحلیل‌های من</span>
+                        </span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-2xl font-bold font-mono text-[#43C6AC]">{userData.chartsCount}</span>
+                          <span className="text-[10px] text-slate-400">چارت ناتال</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* 6. Dashboard Action Buttons */}
-                <div className="flex flex-wrap items-center justify-start gap-2.5 pt-1">
-                  <button
-                    onClick={handleCopyInvite}
-                    className="px-4 py-2 rounded-xl text-xs font-bold bg-[#0A1A18] hover:bg-[#0E2421] text-[#D4B483] border border-[#D4B483]/30 transition cursor-pointer flex items-center gap-1.5 shadow-sm"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-[#D4B483]" />
-                    <span>{copiedInvite ? 'لینک کپی شد!' : '✦ دعوت دوستان و جایزه'}</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('support')}
-                    className="px-4 py-2 rounded-xl text-xs font-medium bg-[#071312] hover:bg-[#0B1E1C] text-[#8BA19B] hover:text-white border border-[#142824] transition cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Headphones className="w-3.5 h-3.5" />
-                    <span>پشتیبانی و راهنما</span>
-                  </button>
-                </div>
+                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1">
+                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1">
+                          <Crown className="w-3.5 h-3.5 text-[#D4B483]" />
+                          <span>امتیاز باشگاه</span>
+                        </span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-2xl font-bold font-mono text-[#D4B483]">{userData.clubPoints}</span>
+                          <span className="text-[10px] text-[#38BDF8]">رتبه {userData.tier}</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1">
+                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1">
+                          <Brain className="w-3.5 h-3.5 text-purple-400" />
+                          <span>پرسش هوش</span>
+                        </span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-2xl font-bold font-mono text-white">{userData.aiCount}</span>
+                          <span className="text-[10px] text-slate-400">آرماهوش</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1">
+                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1">
+                          <Flame className="w-3.5 h-3.5 text-amber-500" />
+                          <span>استریک حضور</span>
+                        </span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-2xl font-bold font-mono text-amber-400">{userData.streakDays}</span>
+                          <span className="text-[10px] text-slate-400">روز متوالی</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bento Grid: 2 Columns */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+                      
+                      {/* Right Bento Column: 7 Cols (Dossier & AI Interactive) */}
+                      <div className="md:col-span-7 space-y-3.5">
+                        
+                        {/* Dossier Bento Card */}
+                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 text-[10px] font-bold">
+                              پرونده متمرکز
+                            </span>
+                            <h3 className="text-base font-bold text-white font-serif">پنل پرونده شخصی</h3>
+                          </div>
+                          
+                          <p className="text-xs text-[#8BA19B] leading-relaxed">
+                            چهار بخش پرونده، پیام مشاور و هماهنگی جلسه — همه در یک‌جا.
+                          </p>
+
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] space-y-0.5">
+                              <span className="text-[11px] text-[#43C6AC] font-bold block">طبع و مزاج</span>
+                              <span className="text-[10px] text-slate-300">گرم و خشک (صفراوی)</span>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] space-y-0.5">
+                              <span className="text-[11px] text-[#43C6AC] font-bold block">طالع ناتال</span>
+                              <span className="text-[10px] text-slate-300">اسد ♌ · طالع میزان ♎</span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => setActiveTab('portal')}
+                            className="w-full py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                          >
+                            <span>ورود به پنل پرونده شخصی ←</span>
+                          </button>
+                        </div>
+
+                        {/* Interactive Armahosh Card */}
+                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3">
+                          <div className="flex items-center justify-between">
+                            <button
+                              onClick={() => setActiveTab('ai')}
+                              className="text-xs text-[#43C6AC] hover:underline"
+                            >
+                              صفحه کامل آرماهوش ←
+                            </button>
+                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                              <Brain className="w-4 h-4 text-[#43C6AC]" />
+                              <span>الان آرماهوش را روی چارتت باز کن</span>
+                            </h3>
+                          </div>
+
+                          <p className="text-xs text-[#8BA19B]">
+                            سه لایۀ روان، مزاج و آسمان روی همین صفحه جمع می‌شود.
+                          </p>
+
+                          {/* Quick chips */}
+                          <div className="flex flex-wrap gap-1.5">
+                            {['تحلیل ترانزیت امروز', 'توصیه مزاجی من'].map((chip, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => handleQuickAskAi(chip)}
+                                className="px-2.5 py-1 rounded-lg bg-[#081816] hover:bg-[#0E2824] text-[#43C6AC] border border-[#164239] text-[11px] transition cursor-pointer"
+                              >
+                                {chip}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={quickAiQuestion}
+                              onChange={(e) => setQuickAiQuestion(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleQuickAskAi()}
+                              placeholder="سؤال خود را بنویسید..."
+                              className="flex-1 bg-[#06100F] border border-[#142824] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#43C6AC] text-right"
+                            />
+                            <button
+                              onClick={() => handleQuickAskAi()}
+                              disabled={isAiLoading}
+                              className="px-4 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold cursor-pointer"
+                            >
+                              {isAiLoading ? '...' : 'برو'}
+                            </button>
+                          </div>
+
+                          {quickAiAnswer && (
+                            <div className="p-3 rounded-xl bg-[#081C18] border border-[#1E4D43] text-xs text-[#A9BAB4] leading-relaxed animate-fade-in">
+                              <strong className="block text-[#43C6AC] mb-1">پاسخ آرماهوش:</strong>
+                              {quickAiAnswer}
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+
+                      {/* Left Bento Column: 5 Cols (Guide & Missions) */}
+                      <div className="md:col-span-5 space-y-3.5">
+                        
+                        {/* Guide Card */}
+                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3">
+                          <h3 className="text-sm font-bold text-white">از کجا شروع کنم؟</h3>
+                          <p className="text-xs text-[#8BA19B] leading-relaxed">
+                            راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره، با نقشۀ دکمه‌ها.
+                          </p>
+
+                          <div className="space-y-1.5 text-xs text-slate-300">
+                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824]">
+                              <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۱</span>
+                              <span>تکمیل پروفایل و تولد</span>
+                            </div>
+                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824]">
+                              <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۲</span>
+                              <span>مشاهده نقشه آسمان</span>
+                            </div>
+                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824]">
+                              <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۳</span>
+                              <span>پرسش از آرماهوش</span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => setActiveTab('courses')}
+                            className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer"
+                          >
+                            شروع سریع در راهنمای آرمانوین
+                          </button>
+                        </div>
+
+                        {/* Missions Bento List */}
+                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-[#43C6AC] font-mono">
+                              {missions.filter(m => m.done).length} از {missions.length} انجام شده
+                            </span>
+                            <h3 className="text-sm font-bold text-white">★ مأموریت‌های تو</h3>
+                          </div>
+
+                          <div className="space-y-2">
+                            {missions.slice(0, 4).map((m) => (
+                              <div
+                                key={m.id}
+                                className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+                                  m.done ? 'bg-[#091D1A]/40 border-emerald-900/40 opacity-70' : 'bg-[#06100F] border-[#142824]'
+                                }`}
+                              >
+                                <button
+                                  onClick={() => handleToggleMission(m.id)}
+                                  className={`px-2.5 py-1 rounded text-[11px] font-medium border ${
+                                    m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#081514] text-white border-[#19322D]'
+                                  }`}
+                                >
+                                  {m.done ? '✓' : m.hrefText}
+                                </button>
+                                <div className="text-right flex-1 truncate">
+                                  <span className={`truncate block ${m.done ? 'line-through text-slate-400' : 'text-[#E8E2D5]'}`}>
+                                    {m.title}
+                                  </span>
+                                </div>
+                                <span className="font-mono text-[#43C6AC] font-bold text-[11px]">{m.points}+</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </div>
+                )}
+
+                {/* ----------------------------------------------------------------- */}
+                {/* COMPOSITION 3: TRI-PILLARS (آسمان | تن و مزاج | روان و هوش)       */}
+                {/* ----------------------------------------------------------------- */}
+                {activeComposition === 'tri-pillars' && (
+                  <div className="space-y-3.5 animate-fade-in">
+                    
+                    {/* Top Philosophy Intro */}
+                    <div className="p-4 rounded-2xl bg-[#071312] border border-[#1E433C] flex items-center justify-between">
+                      <span className="text-xs text-[#8BA19B]">چیدمان متمرکز بر سه ستون اصیل آرمان‌وین</span>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-1 rounded-lg bg-[#09221E] text-[#43C6AC] text-xs font-bold border border-[#164C42]">
+                          آسمان · تن · روان
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 3 Pillars Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      
+                      {/* Pillar 1: آسمان و چارت */}
+                      <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 text-right flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between border-b border-[#142824] pb-2">
+                            <span className="text-[10px] text-[#43C6AC] font-bold bg-[#09221E] px-2 py-0.5 rounded">ستاد آسمان</span>
+                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                              <Compass className="w-4 h-4 text-[#43C6AC]" />
+                              <span>۱. نقشه آسمان</span>
+                            </h3>
+                          </div>
+
+                          <p className="text-xs text-[#8BA19B]">
+                            چارت ناتال، مدار خورشید و گذر کواکب
+                          </p>
+
+                          <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">برج خورشیدی:</span>
+                              <span className="font-bold text-[#43C6AC]">{userData.sunSign}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">طالع صعودی:</span>
+                              <span className="font-bold text-white">{userData.ascendant}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">سیاره حاکم:</span>
+                              <span className="font-bold text-[#D4B483]">{userData.rulerPlanet}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setActiveTab('charts')}
+                          className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer"
+                        >
+                          مشاهده چارت‌ها ←
+                        </button>
+                      </div>
+
+                      {/* Pillar 2: تن و مزاج */}
+                      <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 text-right flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between border-b border-[#142824] pb-2">
+                            <span className="text-[10px] text-[#D4B483] font-bold bg-[#141F1A] px-2 py-0.5 rounded">ستاد تن</span>
+                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                              <Flame className="w-4 h-4 text-[#D4B483]" />
+                              <span>۲. طبع و مزاج</span>
+                            </h3>
+                          </div>
+
+                          <p className="text-xs text-[#8BA19B]">
+                            ارکان چهارگانه بدن، تدابیر فصلی و سلامت
+                          </p>
+
+                          <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">طبع سرشتی:</span>
+                              <span className="font-bold text-white">گرم و خشک</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">خلط غالب:</span>
+                              <span className="font-bold text-[#D4B483]">صفراوی تعدیل‌شده</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">تدبیر فصل:</span>
+                              <span className="font-bold text-emerald-400">تعدیل خشکی پاییز</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setActiveTab('portal')}
+                          className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer"
+                        >
+                          پنل پرونده شخصی ←
+                        </button>
+                      </div>
+
+                      {/* Pillar 3: روان و کهن‌الگو */}
+                      <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 text-right flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between border-b border-[#142824] pb-2">
+                            <span className="text-[10px] text-purple-400 font-bold bg-[#1A1624] px-2 py-0.5 rounded">ستاد روان</span>
+                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                              <Brain className="w-4 h-4 text-purple-400" />
+                              <span>۳. روان و آرماهوش</span>
+                            </h3>
+                          </div>
+
+                          <p className="text-xs text-[#8BA19B]">
+                            کهن‌الگوهای یونگی، سایه‌ها و هوش مصنوعی
+                          </p>
+
+                          <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">کهن‌الگو:</span>
+                              <span className="font-bold text-white">جوینده و خردمند</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">وضعیت سایه:</span>
+                              <span className="font-bold text-purple-300">در حال یکپارچه‌سازی</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#8BA19B]">آرماهوش:</span>
+                              <span className="font-bold text-[#43C6AC]">آماده پرسش</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setActiveTab('ai')}
+                          className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer"
+                        >
+                          الان آرماهوش را باز کن ←
+                        </button>
+                      </div>
+
+                    </div>
+
+                    {/* Integrated Missions for Tri-Pillars */}
+                    <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-[#8BA19B]">مأموریت‌های توزیع‌شده بر سه ساحت</span>
+                        <h3 className="text-sm font-bold text-white">★ مأموریت‌های هفتگی</h3>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        {missions.slice(0, 4).map((m) => (
+                          <div key={m.id} className="p-3 rounded-xl bg-[#06100F] border border-[#142824] flex items-center justify-between gap-2">
+                            <button
+                              onClick={() => handleToggleMission(m.id)}
+                              className={`px-3 py-1 rounded text-xs font-medium border ${
+                                m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#081514] text-white border-[#19322D]'
+                              }`}
+                            >
+                              {m.done ? 'انجام شد ✓' : m.hrefText}
+                            </button>
+                            <span className="text-right truncate">{m.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* ----------------------------------------------------------------- */}
+                {/* COMPOSITION 4: COCKPIT COMMAND (کابین خلبانی و مرکز عملیات پیشرفت) */}
+                {/* ----------------------------------------------------------------- */}
+                {activeComposition === 'cockpit-command' && (
+                  <div className="space-y-3.5 animate-fade-in">
+                    
+                    {/* Cockpit Status Toolbar */}
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-[#071715] via-[#071312] to-[#0B2520] border-2 border-[#1E433C] flex flex-wrap items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1.5 rounded-xl bg-[#09221E] text-[#43C6AC] font-bold border border-[#164C42] flex items-center gap-1.5">
+                          <Flame className="w-4 h-4 text-amber-500 animate-pulse" />
+                          <span>استریک فعال: {userData.streakDays} روز پیوسته</span>
+                        </span>
+                        <span className="text-white font-mono">
+                          سطح {userData.tier} · {userData.clubPoints} امتیاز
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setShowWalletModal(true)}
+                          className="px-3 py-1 rounded-lg bg-[#097565] text-white font-bold"
+                        >
+                          + شارژ کیف پول ({userData.balanceToman} ت)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Cockpit 2-Column Split: Actions Pod & Quest Center */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                      
+                      {/* Left Pod: 3 Quick Action Cards */}
+                      <div className="space-y-3">
+                        <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-2 text-right">
+                          <span className="text-[10px] text-[#43C6AC] font-bold uppercase tracking-wider block">اکشن شماره ۱</span>
+                          <h3 className="text-sm font-bold text-white">پنل پرونده شخصی</h3>
+                          <p className="text-xs text-[#8BA19B]">چهار بخش پرونده، پیام مشاور و هماهنگی جلسه — همه در یک‌جا.</p>
+                          <button
+                            onClick={() => setActiveTab('portal')}
+                            className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition"
+                          >
+                            ورود مستقیم به پرونده ←
+                          </button>
+                        </div>
+
+                        <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-2 text-right">
+                          <span className="text-[10px] text-[#D4B483] font-bold uppercase tracking-wider block">اکشن شماره ۲</span>
+                          <h3 className="text-sm font-bold text-white">الان آرماهوش را روی چارتت باز کن</h3>
+                          <p className="text-xs text-[#8BA19B]">سه لایۀ روان، مزاج و آسمان روی همین صفحه جمع می‌شود.</p>
+                          <button
+                            onClick={() => setActiveTab('ai')}
+                            className="w-full py-2 rounded-xl bg-[#081816] hover:bg-[#0E2824] border border-[#164239] text-[#43C6AC] text-xs font-bold transition"
+                          >
+                            باز کردن کنسول آرماهوش ←
+                          </button>
+                        </div>
+
+                        <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-2 text-right">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">اکشن شماره ۳</span>
+                          <h3 className="text-sm font-bold text-white">از کجا شروع کنم؟</h3>
+                          <p className="text-xs text-[#8BA19B]">راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره.</p>
+                          <button
+                            onClick={() => setActiveTab('courses')}
+                            className="w-full py-2 rounded-xl bg-[#06100F] hover:bg-[#0A1A18] border border-[#142824] text-slate-200 text-xs font-bold transition"
+                          >
+                            راهنمای قدم‌به‌قدم آرمانوین ←
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right Pod: Quest Center (مأموریت‌های فعال) */}
+                      <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3.5 text-right flex flex-col justify-between">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between border-b border-[#142824] pb-2">
+                            <span className="text-xs font-mono text-[#D4B483] font-bold">
+                              {missions.reduce((acc, m) => acc + (m.done ? m.points : 0), 0)} امتیاز کسب‌شده
+                            </span>
+                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                              <Award className="w-4 h-4 text-amber-400" />
+                              <span>مرکز مأموریت‌ها و چالش‌ها</span>
+                            </h3>
+                          </div>
+
+                          <div className="space-y-2">
+                            {missions.map((m) => (
+                              <div
+                                key={m.id}
+                                className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${
+                                  m.done ? 'bg-[#091D1A]/50 border-emerald-900/60' : 'bg-[#06100F] border-[#142824]'
+                                }`}
+                              >
+                                <button
+                                  onClick={() => handleToggleMission(m.id)}
+                                  className={`px-3 py-1 rounded text-xs font-bold transition border ${
+                                    m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#097565] text-white border-transparent'
+                                  }`}
+                                >
+                                  {m.done ? 'انجام شد ✓' : 'انجام و دریافت'}
+                                </button>
+
+                                <div className="text-right flex-1 truncate">
+                                  <span className={`block truncate ${m.done ? 'line-through text-slate-400' : 'text-white'}`}>
+                                    {m.title}
+                                  </span>
+                                </div>
+
+                                <span className="text-xs font-mono font-bold text-[#43C6AC]">
+                                  {m.points}+
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={handleCopyInvite}
+                          className="w-full py-2.5 rounded-xl bg-[#0A1A18] hover:bg-[#0E2421] text-[#D4B483] border border-[#D4B483]/30 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-[#D4B483]" />
+                          <span>{copiedInvite ? 'لینک کپی شد!' : '✦ دعوت دوستان و دریافت ۵۰ امتیاز'}</span>
+                        </button>
+                      </div>
+
+                    </div>
+
+                  </div>
+                )}
 
               </div>
             )}
@@ -893,7 +1204,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: مینی دوره‌ها */}
             {activeTab === 'courses' && (
-              <div className={`rounded-2xl p-6 space-y-6 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">مینی دوره‌های من</h3>
@@ -944,7 +1255,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                         </div>
                       </div>
 
-                      {/* Course Progress bar */}
                       <div className="space-y-1.5 pt-2 border-t border-[#10221F]">
                         <div className="flex items-center justify-between text-[11px] text-[#8BA19B]">
                           <span>پیشرفت شما: {c.completedSessions} از {c.sessionCount} جلسه</span>
@@ -958,7 +1268,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                         </div>
                       </div>
 
-                      {/* Embedded Audio Player if this course is active */}
                       {activeCourseAudio?.id === c.id && (
                         <div className="mt-3 p-3.5 rounded-xl bg-[#091D1A] border border-[#1E4D43] flex items-center justify-between gap-3 text-xs animate-fade-in">
                           <div className="flex items-center gap-3">
@@ -987,7 +1296,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: تحلیل‌های من (چارت‌ها) */}
             {activeTab === 'charts' && (
-              <div className={`rounded-2xl p-6 space-y-6 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">تحلیل‌های آسمان من</h3>
@@ -1008,7 +1317,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-2 order-2 sm:order-1">
                           <button 
-                            onClick={() => setSelectedVariant('embedded-chart')}
+                            onClick={() => setActiveComposition('tri-pillars')}
                             className="px-3.5 py-1.5 rounded-lg bg-[#09221E] hover:bg-[#0E332D] text-[#43C6AC] border border-[#164C42] text-xs font-medium cursor-pointer"
                           >
                             مشاهده دایره‌البروج
@@ -1043,7 +1352,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: هوش مصنوعی آرماهوش */}
             {activeTab === 'ai' && (
-              <div className={`rounded-2xl p-6 space-y-5 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-5 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">دستیار تحلیلی آرماهوش</h3>
@@ -1054,7 +1363,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   </span>
                 </div>
 
-                {/* Predefined prompt pills */}
                 <div className="space-y-2">
                   <span className="text-xs text-[#8BA19B]">پرسش‌های سریع و کلیدی:</span>
                   <div className="flex flex-wrap gap-2">
@@ -1077,7 +1385,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* Chat window */}
                 <div className="h-72 overflow-y-auto p-4 rounded-2xl bg-[#050C0C] border border-[#142824] space-y-3.5 scrollbar-thin">
                   {aiChatMessages.map((msg, idx) => (
                     <div
@@ -1100,7 +1407,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   ))}
                 </div>
 
-                {/* Message input */}
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -1123,7 +1429,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: سفارش‌ها */}
             {activeTab === 'orders' && (
-              <div className={`rounded-2xl p-6 space-y-5 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-5 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4">
                   <h3 className="text-lg font-bold text-white font-serif">سفارش‌ها و بسته‌ها</h3>
                   <p className="text-xs text-[#8BA19B]">تاریخچه خرید بسته‌های آموزشی، تحلیل ناتال و مشاوره‌ها</p>
@@ -1154,7 +1460,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: کیف پول */}
             {activeTab === 'wallet' && (
-              <div className={`rounded-2xl p-6 space-y-6 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">کیف پول آرمانوین</h3>
@@ -1169,7 +1475,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   </button>
                 </div>
 
-                {/* Balance display card */}
                 <div className="p-5 rounded-2xl bg-[#06100F] border border-[#142824] flex items-center justify-between">
                   <div className="text-left">
                     <span className="text-2xl sm:text-3xl font-mono font-bold text-[#43C6AC] block">
@@ -1183,7 +1488,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* Transaction history */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold text-white">تاریخچه تراکنش‌ها:</h4>
                   {walletHistory.map((w) => (
@@ -1203,7 +1507,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: کسب درآمد */}
             {activeTab === 'income' && (
-              <div className={`rounded-2xl p-6 space-y-6 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4">
                   <h3 className="text-lg font-bold text-white font-serif">کسب درآمد و معرفی دوستان</h3>
                   <p className="text-xs text-[#8BA19B]">با معرفی آرمانوین به علاقه‌مندان خودشناسی، ۲۰٪ از هر خرید به عنوان پاداش به کیف پول شما اضافه می‌شود</p>
@@ -1224,7 +1528,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* Referral Link Box */}
                 <div className="p-4 rounded-xl bg-[#06100F] border border-[#142824] space-y-3">
                   <span className="text-xs text-white font-bold block">لینک دعوت اختصاصی شما:</span>
                   <div className="flex gap-2">
@@ -1248,7 +1551,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: باشگاه مشتریان */}
             {activeTab === 'club' && (
-              <div className={`rounded-2xl p-6 space-y-6 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">باشگاه مشتریان و امتیازات</h3>
@@ -1260,7 +1563,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* Tier progress */}
                 <div className="p-4 rounded-xl bg-[#06100F] border border-[#142824] space-y-3">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[#38BDF8] font-bold">سطح بعدی: نقره‌ای (۱۰۰ امتیاز)</span>
@@ -1275,7 +1577,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   <p className="text-[11px] text-[#8BA19B]">تنها ۴۹ امتیاز دیگر تا ارتقا به رتبه نقره‌ای و دریافت ۲۰٪ تخفیف روی جلسات مشاوره</p>
                 </div>
 
-                {/* Redeemable Rewards list */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold text-white">جوایز و هدایای قابل فعال‌سازی با امتیاز:</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1307,7 +1608,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: پنل پرونده شخصی */}
             {activeTab === 'portal' && (
-              <div className={`rounded-2xl p-6 space-y-6 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">پنل پرونده شخصی یکپارچه</h3>
@@ -1358,7 +1659,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: تیکت‌های من */}
             {activeTab === 'support' && (
-              <div className={`rounded-2xl p-6 space-y-6 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">تیکت‌های پشتیبانی و مشاوره</h3>
@@ -1400,7 +1701,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: اطلاعات حساب کاربری */}
             {activeTab === 'profile' && (
-              <div className={`rounded-2xl p-6 space-y-6 text-right animate-fade-in ${getCardClasses()}`}>
+              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
                 <div className="border-b border-[#142824] pb-4">
                   <h3 className="text-lg font-bold text-white font-serif">اطلاعات حساب کاربری</h3>
                   <p className="text-xs text-[#8BA19B]">مشخصات فردی و اطلاعات تولد برای محاسبه دقیق چارت و پرونده</p>
@@ -1485,7 +1786,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
           {/* RIGHT COLUMN: SIDEBAR MENU (EXACT MATCH TO IMAGE.PNG)                   */}
           {/* ======================================================================= */}
           <div className="order-1 lg:order-2 space-y-2">
-            <div className={`rounded-2xl p-2.5 sm:p-3 space-y-1 ${getCardClasses()}`}>
+            <div className="rounded-2xl p-2.5 sm:p-3 bg-[#071312] border border-[#142824] shadow-md space-y-1">
               {menuItems.map((item) => {
                 const IconComponent = item.icon;
                 const isActive = activeTab === item.id;
@@ -1506,7 +1807,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
               })}
 
               <div className="pt-2 border-t border-[#142824] space-y-1">
-                {/* خروج از حساب (Exact match to screenshot in coral/red) */}
                 <button
                   onClick={onLogout}
                   className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] text-[#F87171] hover:bg-rose-950/20 hover:text-rose-300 transition cursor-pointer"
@@ -1515,7 +1815,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   <span className="font-medium mr-auto text-right">خروج از حساب</span>
                 </button>
 
-                {/* خروج از همۀ دستگاه‌ها (Exact match to screenshot in coral/red) */}
                 <button
                   onClick={onLogout}
                   className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] text-[#F87171] hover:bg-rose-950/20 hover:text-rose-300 transition cursor-pointer"
