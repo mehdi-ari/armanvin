@@ -300,3 +300,35 @@
   transform: translateX(-100%);
   animation: shimmerGlint 4s infinite;
 }
+
+/* Subtle Cyber-Glow border and ambient lighting effect for interactive activity cards */
+.cyber-glow-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cyber-glow-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(67, 198, 172, 0.45), rgba(212, 180, 131, 0.25), rgba(9, 117, 101, 0.45));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.cyber-glow-card:hover::after {
+  opacity: 1;
+}
+
+.cyber-glow-card:hover {
+  border-color: rgba(67, 198, 172, 0.5);
+  box-shadow: 0 0 22px rgba(67, 198, 172, 0.16), 0 8px 30px rgba(0, 0, 0, 0.55);
+  transform: translateY(-2px);
+}
+

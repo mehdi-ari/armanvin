@@ -37,8 +37,8 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
   onLogout,
   onNavigateToCourse,
 }) => {
-  // Selected composition (default is the user's exact original design)
-  const [activeComposition, setActiveComposition] = useState<UserDesignComposition>('classic-stacked');
+  // Selected composition (Modern Bento Grid kept as requested)
+  const [activeComposition, setActiveComposition] = useState<UserDesignComposition>('bento-grid');
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<AccountTabId>('dashboard');
@@ -447,7 +447,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
         {/* ========================================================================= */}
         {/* TOP USER CARD (.acct-head) matching image.png                             */}
         {/* ========================================================================= */}
-        <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-[#071312] border border-[#142824] shadow-md relative overflow-hidden">
+        <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-[#071312] border border-[#142824] shadow-md relative overflow-hidden cyber-glow-card">
           <div className="flex items-center justify-between gap-4">
             
             {/* User Greeting & Wealth Bar */}
@@ -532,7 +532,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                 {activeComposition === 'classic-stacked' && (
                   <div className="space-y-3.5">
                     {/* 1. Hero Card: پنل پرونده شخصی */}
-                    <div className="rounded-2xl p-5 sm:p-6 bg-[#071312] border border-[#142824] shadow-md">
+                    <div className="rounded-2xl p-5 sm:p-6 bg-[#071312] border border-[#142824] shadow-md cyber-glow-card">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <button
                           onClick={() => setActiveTab('portal')}
@@ -553,7 +553,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                     </div>
 
                     {/* 2. Quickstart Card: از کجا شروع کنم؟ */}
-                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md">
+                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md cyber-glow-card">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <button
                           onClick={() => setActiveTab('courses')}
@@ -574,7 +574,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                     </div>
 
                     {/* 3. Next Action Card: الان آرماهوش را روی چارتت باز کن */}
-                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md">
+                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md cyber-glow-card">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <button
                           onClick={() => setActiveTab('ai')}
@@ -595,7 +595,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                     </div>
 
                     {/* 4. Stat Chips Bar matching image.png */}
-                    <div className="rounded-2xl p-3.5 sm:p-4 bg-[#071312] border border-[#142824] shadow-md flex flex-wrap items-center justify-start gap-2">
+                    <div className="rounded-2xl p-3.5 sm:p-4 bg-[#071312] border border-[#142824] shadow-md flex flex-wrap items-center justify-start gap-2 cyber-glow-card">
                       <span className="px-3.5 py-1.5 rounded-full bg-[#09221E] border border-[#164C42] text-[#43C6AC] text-xs font-bold flex items-center gap-1.5">
                         <b className="font-mono">{userData.chartsCount}</b>
                         <span>تحلیل ساخته‌شده</span>
@@ -682,48 +682,48 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                 {activeComposition === 'bento-grid' && (
                   <div className="space-y-3.5 animate-fade-in">
                     
-                    {/* Top Row: 4 Metric Cards */}
+                    {/* Top Row: 4 Metric Cards with Cyber-Glow */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1">
-                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1">
+                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('charts')}>
+                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-[#43C6AC] transition">
                           <Eye className="w-3.5 h-3.5 text-[#43C6AC]" />
                           <span>تحلیل‌های من</span>
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-bold font-mono text-[#43C6AC]">{userData.chartsCount}</span>
+                          <span className="text-2xl font-bold font-mono text-[#43C6AC] group-hover:scale-105 transition-transform duration-200">{userData.chartsCount}</span>
                           <span className="text-[10px] text-slate-400">چارت ناتال</span>
                         </div>
                       </div>
 
-                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1">
-                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1">
+                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('club')}>
+                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-[#D4B483] transition">
                           <Crown className="w-3.5 h-3.5 text-[#D4B483]" />
                           <span>امتیاز باشگاه</span>
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-bold font-mono text-[#D4B483]">{userData.clubPoints}</span>
+                          <span className="text-2xl font-bold font-mono text-[#D4B483] group-hover:scale-105 transition-transform duration-200">{userData.clubPoints}</span>
                           <span className="text-[10px] text-[#38BDF8]">رتبه {userData.tier}</span>
                         </div>
                       </div>
 
-                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1">
-                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1">
+                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('ai')}>
+                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-purple-300 transition">
                           <Brain className="w-3.5 h-3.5 text-purple-400" />
                           <span>پرسش هوش</span>
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-bold font-mono text-white">{userData.aiCount}</span>
+                          <span className="text-2xl font-bold font-mono text-white group-hover:text-[#43C6AC] group-hover:scale-105 transition-all duration-200">{userData.aiCount}</span>
                           <span className="text-[10px] text-slate-400">آرماهوش</span>
                         </div>
                       </div>
 
-                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1">
-                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1">
-                          <Flame className="w-3.5 h-3.5 text-amber-500" />
+                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group">
+                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-amber-400 transition">
+                          <Flame className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
                           <span>استریک حضور</span>
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-bold font-mono text-amber-400">{userData.streakDays}</span>
+                          <span className="text-2xl font-bold font-mono text-amber-400 group-hover:scale-105 transition-transform duration-200">{userData.streakDays}</span>
                           <span className="text-[10px] text-slate-400">روز متوالی</span>
                         </div>
                       </div>
@@ -735,8 +735,8 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                       {/* Right Bento Column: 7 Cols (Dossier & AI Interactive) */}
                       <div className="md:col-span-7 space-y-3.5">
                         
-                        {/* Dossier Bento Card */}
-                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-4">
+                        {/* Dossier Bento Card with Cyber-Glow */}
+                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-4 cyber-glow-card">
                           <div className="flex items-center justify-between">
                             <span className="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 text-[10px] font-bold">
                               پرونده متمرکز
@@ -749,12 +749,12 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                           </p>
 
                           <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] space-y-0.5">
-                              <span className="text-[11px] text-[#43C6AC] font-bold block">طبع و مزاج</span>
+                            <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/50 transition-colors duration-200 space-y-0.5 group">
+                              <span className="text-[11px] text-[#43C6AC] font-bold block group-hover:text-emerald-300">طبع و مزاج</span>
                               <span className="text-[10px] text-slate-300">گرم و خشک (صفراوی)</span>
                             </div>
-                            <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] space-y-0.5">
-                              <span className="text-[11px] text-[#43C6AC] font-bold block">طالع ناتال</span>
+                            <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/50 transition-colors duration-200 space-y-0.5 group">
+                              <span className="text-[11px] text-[#43C6AC] font-bold block group-hover:text-emerald-300">طالع ناتال</span>
                               <span className="text-[10px] text-slate-300">اسد ♌ · طالع میزان ♎</span>
                             </div>
                           </div>
@@ -767,8 +767,8 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                           </button>
                         </div>
 
-                        {/* Interactive Armahosh Card */}
-                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3">
+                        {/* Interactive Armahosh Card with Cyber-Glow */}
+                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
                           <div className="flex items-center justify-between">
                             <button
                               onClick={() => setActiveTab('ai')}
@@ -792,7 +792,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                               <button
                                 key={idx}
                                 onClick={() => handleQuickAskAi(chip)}
-                                className="px-2.5 py-1 rounded-lg bg-[#081816] hover:bg-[#0E2824] text-[#43C6AC] border border-[#164239] text-[11px] transition cursor-pointer"
+                                className="px-2.5 py-1 rounded-lg bg-[#081816] hover:bg-[#0E2824] text-[#43C6AC] hover:text-white border border-[#164239] hover:border-[#43C6AC]/60 text-[11px] transition cursor-pointer"
                               >
                                 {chip}
                               </button>
@@ -811,7 +811,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                             <button
                               onClick={() => handleQuickAskAi()}
                               disabled={isAiLoading}
-                              className="px-4 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold cursor-pointer"
+                              className="px-4 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold cursor-pointer transition shadow-sm"
                             >
                               {isAiLoading ? '...' : 'برو'}
                             </button>
@@ -830,23 +830,23 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                       {/* Left Bento Column: 5 Cols (Guide & Missions) */}
                       <div className="md:col-span-5 space-y-3.5">
                         
-                        {/* Guide Card */}
-                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3">
+                        {/* Guide Card with Cyber-Glow */}
+                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
                           <h3 className="text-sm font-bold text-white">از کجا شروع کنم؟</h3>
                           <p className="text-xs text-[#8BA19B] leading-relaxed">
                             راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره، با نقشۀ دکمه‌ها.
                           </p>
 
                           <div className="space-y-1.5 text-xs text-slate-300">
-                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824]">
+                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
                               <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۱</span>
                               <span>تکمیل پروفایل و تولد</span>
                             </div>
-                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824]">
+                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
                               <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۲</span>
                               <span>مشاهده نقشه آسمان</span>
                             </div>
-                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824]">
+                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
                               <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۳</span>
                               <span>پرسش از آرماهوش</span>
                             </div>
@@ -854,14 +854,14 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
                           <button
                             onClick={() => setActiveTab('courses')}
-                            className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer"
+                            className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer shadow-sm"
                           >
                             شروع سریع در راهنمای آرمانوین
                           </button>
                         </div>
 
-                        {/* Missions Bento List */}
-                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3">
+                        {/* Missions Bento Card with Cyber-Glow */}
+                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
                           <div className="flex items-center justify-between">
                             <span className="text-[11px] text-[#43C6AC] font-mono">
                               {missions.filter(m => m.done).length} از {missions.length} انجام شده
@@ -873,14 +873,16 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                             {missions.slice(0, 4).map((m) => (
                               <div
                                 key={m.id}
-                                className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 ${
-                                  m.done ? 'bg-[#091D1A]/40 border-emerald-900/40 opacity-70' : 'bg-[#06100F] border-[#142824]'
+                                className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 transition-all duration-200 ${
+                                  m.done 
+                                    ? 'bg-[#091D1A]/40 border-emerald-900/40 opacity-70' 
+                                    : 'bg-[#06100F] border-[#142824] hover:border-[#43C6AC]/50 hover:bg-[#091D1A]/30'
                                 }`}
                               >
                                 <button
                                   onClick={() => handleToggleMission(m.id)}
-                                  className={`px-2.5 py-1 rounded text-[11px] font-medium border ${
-                                    m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#081514] text-white border-[#19322D]'
+                                  className={`px-2.5 py-1 rounded text-[11px] font-medium border transition cursor-pointer ${
+                                    m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#081514] hover:bg-[#0E201E] text-white border-[#19322D]'
                                   }`}
                                 >
                                   {m.done ? '✓' : m.hrefText}
