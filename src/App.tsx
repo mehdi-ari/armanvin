@@ -72,6 +72,7 @@ export default function App() {
               onNavigateToCourse={() => {
                 // Course navigation handler
               }}
+              isSimulatorFrame={deviceMode === 'mobile' || deviceMode === 'tablet'}
             />
           ) : (
             <div className="w-full min-h-[calc(100vh-140px)] flex items-center justify-center py-16 px-4" dir="rtl">

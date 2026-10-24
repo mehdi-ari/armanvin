@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Sun, BookOpen, Eye, Brain, Receipt, Wallet, Sprout, Crown, Rocket, 
   Headphones, User, LogOut, ArrowLeft, Star, Sparkles, Check, ChevronDown, 
   ChevronUp, Send, Copy, AlertCircle, Compass, Flame, Shield, RefreshCw,
   Play, Pause, Plus, Clock, ExternalLink, Calendar, MapPin, CheckCircle2,
   FileText, ArrowUpRight, MessageSquare, Award, CreditCard, Filter,
-  Menu as MenuIcon, X
+  Menu as MenuIcon, X, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { MINI_COURSES_DATA, MiniCourse } from '../../data/miniCoursesData';
 
@@ -25,14 +25,17 @@ export type AccountTabId =
 interface UserAccountDashboardProps {
   onLogout?: () => void;
   onNavigateToCourse?: (courseId?: string) => void;
+  isSimulatorFrame?: boolean;
 }
 
 export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
   onLogout,
   onNavigateToCourse,
+  isSimulatorFrame = false,
 }) => {
   // Active Tab in Account Dashboard
   const [activeTab, setActiveTab] = useState<AccountTabId>('dashboard');
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
 
 
   // Quick AI in-card prompt state
@@ -336,21 +339,26 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
   };
 
   // Sidebar Menu Items matching the exact screenshot (11 items)
-  const menuItems: { id: AccountTabId; label: string; icon: React.ElementType }[] = [
+  const menuItems: { id: AccountTabId; label: string; icon: React.ElementType; badge?: string }[] = [
     { id: 'dashboard', label: 'داشبورد', icon: Sun },
-    { id: 'courses', label: 'مینی دوره‌ها', icon: BookOpen },
-    { id: 'charts', label: 'تحلیل‌های من', icon: Eye },
-    { id: 'ai', label: 'هوش مصنوعی', icon: Brain },
+    { id: 'courses', label: 'مینی دوره‌ها', icon: BookOpen, badge: '۳ دوره' },
+    { id: 'charts', label: 'تحلیل‌های من', icon: Eye, badge: '۲ چارت' },
+    { id: 'ai', label: 'هوش مصنوعی', icon: Brain, badge: 'آرماهوش' },
     { id: 'orders', label: 'سفارش‌ها', icon: Receipt },
     { id: 'wallet', label: 'کیف پول', icon: Wallet },
     { id: 'income', label: 'کسب درآمد', icon: Sprout },
-    { id: 'club', label: 'باشگاه مشتریان', icon: Crown },
+    { id: 'club', label: 'باشگاه مشتریان', icon: Crown, badge: '۷۴۰ پ' },
     { id: 'portal', label: 'پنل پرونده شخصی', icon: Rocket },
     { id: 'support', label: 'تیکت‌های من', icon: Headphones },
     { id: 'profile', label: 'اطلاعات حساب', icon: User },
   ];
 
   const currentTabLabel = menuItems.find(m => m.id === activeTab)?.label || 'داشبورد';
+
+  // Dynamic sticky offset: inside simulator frame sticks at top-0; on window scroll sticks below HeaderNav
+  const stickyTopClass = isSimulatorFrame 
+    ? 'top-0' 
+    : 'top-[54px] sm:top-[62px]';
 
   return (
     <div className="w-full min-h-[calc(100vh-140px)] bg-[#040909] text-[#F3EFE6] py-3 sm:py-8 px-2.5 sm:px-6 select-none font-sans" dir="rtl">
@@ -424,31 +432,70 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* FROZEN STICKY TABS BAR (فریز شده در بالای صفحه برای همراهی با اسکرول)       */}
+        {/* FROZEN STICKY TABS BAR (فریز شده در بالای صفحه برای همراهی مداوم با اسکرول) */}
         {/* ========================================================================= */}
-        <div className="lg:hidden sticky top-0 z-30 bg-[#040909]/95 backdrop-blur-md -mx-2.5 px-2.5 sm:-mx-6 sm:px-6 py-2.5 border-b border-[#142824] shadow-xl">
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
-            {menuItems.map((item) => {
-              const isActive = activeTab === item.id;
-              const IconComp = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className={`px-3.5 py-2 rounded-xl whitespace-nowrap flex items-center gap-2 transition-all duration-200 text-xs sm:text-[13px] font-medium cursor-pointer shrink-0 border ${
-                    isActive
-                      ? 'bg-gradient-to-r from-[#097565] via-[#0b8a77] to-[#047857] text-white font-bold border-[#43C6AC] shadow-[0_0_15px_rgba(9,117,101,0.45)]'
-                      : 'bg-[#06100F] text-[#8BA19B] hover:text-white border-[#142824] hover:bg-[#0C1E1B]'
-                  }`}
-                >
-                  <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-[#43C6AC]'}`} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
+        <div className={`sticky ${stickyTopClass} z-30 transition-all duration-200 bg-[#040909]/95 backdrop-blur-md -mx-2.5 px-2.5 sm:-mx-6 sm:px-6 py-2 border-y border-[#142824] shadow-[0_10px_30px_rgba(0,0,0,0.85)]`}>
+          <div className="relative flex items-center">
+            {/* Scroll forward button (in RTL, scroll right) */}
+            <button
+              onClick={() => {
+                if (tabsContainerRef.current) {
+                  tabsContainerRef.current.scrollBy({ left: 160, behavior: 'smooth' });
+                }
+              }}
+              title="مشاهده بخش‌های بعد"
+              className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg bg-[#071312] border border-[#142824] text-[#8BA19B] hover:text-white hover:border-[#43C6AC] shrink-0 ml-1.5 transition cursor-pointer shadow-sm"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Scrollable Tabs Row */}
+            <div 
+              ref={tabsContainerRef} 
+              className="flex-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 scroll-smooth"
+            >
+              {menuItems.map((item) => {
+                const isActive = activeTab === item.id;
+                const IconComp = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={(e) => {
+                      setActiveTab(item.id);
+                      e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }}
+                    className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl whitespace-nowrap flex items-center gap-2 transition-all duration-200 text-xs sm:text-[13px] font-medium cursor-pointer shrink-0 border ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#097565] via-[#0b8a77] to-[#047857] text-white font-bold border-[#43C6AC] shadow-[0_0_15px_rgba(9,117,101,0.45)]'
+                        : 'bg-[#06100F] text-[#8BA19B] hover:text-white border-[#142824] hover:bg-[#0C1E1B] hover:border-[#1E433C]'
+                    }`}
+                  >
+                    <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-[#43C6AC]'}`} />
+                    <span>{item.label}</span>
+                    {item.badge && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-[#0E2622] text-[#43C6AC]'
+                      }`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Scroll backward button (in RTL, scroll left) */}
+            <button
+              onClick={() => {
+                if (tabsContainerRef.current) {
+                  tabsContainerRef.current.scrollBy({ left: -160, behavior: 'smooth' });
+                }
+              }}
+              title="مشاهده بخش‌های قبل"
+              className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg bg-[#071312] border border-[#142824] text-[#8BA19B] hover:text-white hover:border-[#43C6AC] shrink-0 mr-1.5 transition cursor-pointer shadow-sm"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
@@ -1289,7 +1336,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
           {/* ======================================================================= */}
           {/* RIGHT COLUMN: DESKTOP SIDEBAR MENU (EXACT MATCH TO IMAGE.PNG)           */}
           {/* ======================================================================= */}
-          <div className="hidden lg:block order-1 lg:order-2 space-y-2 sticky top-20">
+          <div className="hidden lg:block order-1 lg:order-2 space-y-2 sticky top-[125px]">
             <div className="rounded-2xl p-2.5 sm:p-3 bg-[#071312] border border-[#142824] shadow-md space-y-1 cyber-glow-card">
               {menuItems.map((item) => {
                 const IconComponent = item.icon;
