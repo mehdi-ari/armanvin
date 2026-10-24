@@ -4,8 +4,8 @@ import {
   Headphones, User, LogOut, ArrowLeft, Star, Sparkles, Check, ChevronDown, 
   ChevronUp, Send, Copy, AlertCircle, Compass, Flame, Shield, RefreshCw,
   Play, Pause, Plus, Clock, ExternalLink, Calendar, MapPin, CheckCircle2,
-  FileText, ArrowUpRight, MessageSquare, Award, CreditCard, Filter, LayoutGrid,
-  Columns, Layers, MonitorPlay, Zap
+  FileText, ArrowUpRight, MessageSquare, Award, CreditCard, Filter,
+  Menu as MenuIcon, X
 } from 'lucide-react';
 import { MINI_COURSES_DATA, MiniCourse } from '../../data/miniCoursesData';
 
@@ -22,12 +22,6 @@ export type AccountTabId =
   | 'support'
   | 'profile';
 
-export type UserDesignComposition = 
-  | 'classic-stacked'   // ۱. ترکیب کلاسیک ستونی (عین اسکرین‌شات شما)
-  | 'bento-grid'        // ۲. ترکیب بنتو گرید مدرن (کارت‌های ۲ ستونه هوشمند)
-  | 'tri-pillars'       // ۳. ترکیب سه‌ساحت اختصاصی آرمان‌وین (آسمان، تن و مزاج، روان)
-  | 'cockpit-command';  // ۴. ترکیب کابین خلبانی (داشبورد مأموریت و اکشن متمرکز)
-
 interface UserAccountDashboardProps {
   onLogout?: () => void;
   onNavigateToCourse?: (courseId?: string) => void;
@@ -37,11 +31,11 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
   onLogout,
   onNavigateToCourse,
 }) => {
-  // Selected composition (Modern Bento Grid kept as requested)
-  const [activeComposition, setActiveComposition] = useState<UserDesignComposition>('bento-grid');
-
-  // Active Tab
+  // Active Tab in Account Dashboard
   const [activeTab, setActiveTab] = useState<AccountTabId>('dashboard');
+
+  // Mobile Menu Drawer state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Quick AI in-card prompt state
   const [quickAiQuestion, setQuickAiQuestion] = useState('');
@@ -343,7 +337,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
     setShowWalletModal(false);
   };
 
-  // Sidebar Menu Items matching the exact screenshot
+  // Sidebar Menu Items matching the exact screenshot (11 items)
   const menuItems: { id: AccountTabId; label: string; icon: React.ElementType }[] = [
     { id: 'dashboard', label: 'داشبورد', icon: Sun },
     { id: 'courses', label: 'مینی دوره‌ها', icon: BookOpen },
@@ -358,113 +352,33 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
     { id: 'profile', label: 'اطلاعات حساب', icon: User },
   ];
 
-  const compositionsList = [
-    { 
-      id: 'classic-stacked', 
-      title: '۱. ترکیب کلاسیک ستونی', 
-      desc: 'تطابق کامل ۱:۱ با چینش اسکرین‌شات شما',
-      icon: Layers,
-      badge: 'طرح اصلی شما'
-    },
-    { 
-      id: 'bento-grid', 
-      title: '۲. ترکیب بنتو گرید مدرن', 
-      desc: 'چینش شبکه‌ای هوشمند با کارت‌های تحلیلی و آماری شاخص',
-      icon: LayoutGrid,
-      badge: 'شبکه‌ای هوشمند'
-    },
-    { 
-      id: 'tri-pillars', 
-      title: '۳. ترکیب سه‌ساحت آرمان‌وین', 
-      desc: 'دسته‌بندی ارکان سایت در ۳ ستون: آسمان | تن و مزاج | روان',
-      icon: Columns,
-      badge: 'آسمان · مزاج · روان'
-    },
-    { 
-      id: 'cockpit-command', 
-      title: '۴. ترکیب کابین خلبانی', 
-      desc: 'مرکز متمرکز مأموریت‌های روزانه، چالش‌ها و اقدام سریع',
-      icon: Zap,
-      badge: 'گیمیفیکیشن و اقدام'
-    },
-  ];
+  const currentTabLabel = menuItems.find(m => m.id === activeTab)?.label || 'داشبورد';
 
   return (
-    <div className="w-full min-h-[calc(100vh-140px)] bg-[#040909] text-[#F3EFE6] py-4 sm:py-8 px-3 sm:px-6 select-none font-sans" dir="rtl">
-      <div className="max-w-[1020px] mx-auto space-y-4">
+    <div className="w-full min-h-[calc(100vh-140px)] bg-[#040909] text-[#F3EFE6] py-3 sm:py-8 px-2.5 sm:px-6 select-none font-sans" dir="rtl">
+      <div className="max-w-[1020px] mx-auto space-y-3.5 sm:space-y-4">
         
         {/* ========================================================================= */}
-        {/* PROMINENT COMPOSITION SWITCHER: CLEAR, DRAMATIC, HIGH-IMPACT SELECTION     */}
+        {/* TOP USER CARD (.acct-head) matching image.png with Cyber-Glow             */}
         {/* ========================================================================= */}
-        <div className="w-full bg-[#071312] border-2 border-[#1E433C] rounded-2xl p-3 sm:p-4 shadow-xl space-y-3 text-right">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#142824] pb-2.5">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#43C6AC] animate-ping" />
-              <h2 className="text-xs sm:text-sm font-extrabold text-white">
-                تغییر چیدمان و ترکیب داشبورد (بر پایه محتوای طرح اختصاصی شما):
-              </h2>
-            </div>
-            <span className="text-[11px] text-[#43C6AC] font-mono bg-[#09221E] px-2.5 py-0.5 rounded-full border border-[#164C42]">
-              ترکیب فعال: {compositionsList.find(c => c.id === activeComposition)?.badge}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            {compositionsList.map((comp) => {
-              const CompIcon = comp.icon;
-              const isActive = activeComposition === comp.id;
-              return (
-                <button
-                  key={comp.id}
-                  onClick={() => setActiveComposition(comp.id as UserDesignComposition)}
-                  className={`p-3 rounded-xl text-right transition cursor-pointer flex flex-col justify-between gap-2 relative overflow-hidden border ${
-                    isActive
-                      ? 'bg-gradient-to-br from-[#0B2520] to-[#071715] border-[#43C6AC] ring-2 ring-[#43C6AC]/40 shadow-[0_0_20px_rgba(67,198,172,0.25)]'
-                      : 'bg-[#06100F] hover:bg-[#0B1E1B] border-[#142824] hover:border-[#1E433C]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${isActive ? 'bg-[#097565] text-white' : 'bg-[#0A1A18] text-[#8BA19B]'}`}>
-                      {comp.badge}
-                    </span>
-                    <CompIcon className={`w-4 h-4 ${isActive ? 'text-[#43C6AC]' : 'text-[#8BA19B]'}`} />
-                  </div>
-
-                  <div>
-                    <span className={`text-xs font-bold block ${isActive ? 'text-white' : 'text-[#A9BAB4]'}`}>
-                      {comp.title}
-                    </span>
-                    <span className="text-[10px] text-[#8BA19B] line-clamp-1 block mt-0.5">
-                      {comp.desc}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* TOP USER CARD (.acct-head) matching image.png                             */}
-        {/* ========================================================================= */}
-        <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-[#071312] border border-[#142824] shadow-md relative overflow-hidden cyber-glow-card">
-          <div className="flex items-center justify-between gap-4">
+        <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md relative overflow-hidden cyber-glow-card">
+          <div className="flex items-center justify-between gap-3">
             
             {/* User Greeting & Wealth Bar */}
-            <div className="space-y-1.5 text-right">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <div className="space-y-1 sm:space-y-1.5 text-right">
+              <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5 sm:gap-2">
                 <span>سلام، {userData.displayName}</span>
-                <span className="text-2xl">🖐🏻</span>
+                <span className="text-xl sm:text-2xl">🖐🏻</span>
               </h1>
               
-              <div className="flex items-center gap-2 text-xs text-[#8BA19B] font-medium">
+              <div className="flex items-center gap-2 text-[11px] sm:text-xs text-[#8BA19B] font-medium">
                 <span>سطح: {userData.plan}</span>
                 <span className="text-[#1E433C]">|</span>
                 <span className="text-[#A9BAB4]">طبع: {userData.temperament}</span>
               </div>
 
               {/* Wealth Bar matching image.png */}
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs sm:text-sm font-medium text-[#43C6AC]">
+              <div className="flex flex-wrap items-center gap-2 pt-0.5 sm:pt-1 text-xs sm:text-sm font-medium text-[#43C6AC]">
                 <button 
                   onClick={() => setShowWalletModal(true)}
                   className="hover:underline cursor-pointer flex items-center gap-1.5 group"
@@ -490,7 +404,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* Sacred Lotus Mandala Avatar Badge (Exact match to image.png) */}
             <div className="relative shrink-0">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#0E2421] to-[#051110] border-2 border-[#1E433C] p-2 flex items-center justify-center shadow-[0_0_25px_rgba(67,198,172,0.25)] group hover:border-[#43C6AC] transition duration-300">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#0E2421] to-[#051110] border-2 border-[#1E433C] p-2 flex items-center justify-center shadow-[0_0_25px_rgba(67,198,172,0.25)] group hover:border-[#43C6AC] transition duration-300">
                 <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_8px_rgba(67,198,172,0.6)]">
                   <defs>
                     <linearGradient id="avatarLotusGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -499,10 +413,8 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                       <stop offset="100%" stopColor="#087F6E" />
                     </linearGradient>
                   </defs>
-                  {/* Central Diamond */}
                   <polygon points="50,15 65,50 50,85 35,50" fill="none" stroke="url(#avatarLotusGrad)" strokeWidth="2.5" />
                   <polygon points="15,50 50,35 85,50 50,65" fill="none" stroke="url(#avatarLotusGrad)" strokeWidth="2" opacity="0.8" />
-                  {/* Outer Circles */}
                   <circle cx="50" cy="50" r="32" fill="none" stroke="#43C6AC" strokeWidth="1" strokeDasharray="3 3" opacity="0.5" />
                   <circle cx="50" cy="50" r="12" fill="url(#avatarLotusGrad)" opacity="0.3" />
                   <circle cx="50" cy="50" r="4" fill="#D4B483" />
@@ -514,699 +426,395 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* MAIN BODY: 2 COLUMNS (RIGHT MENU, LEFT CONTENT) EXACTLY AS IN IMAGE.PNG   */}
+        {/* MOBILE ACCOUNT MENU BAR (منطبق بر زبان طراحی کپسولی عکس image_95e7b2f6)  */}
+        {/* ========================================================================= */}
+        <div className="lg:hidden space-y-2">
+          {/* Main Trigger Bar: identical aesthetic to the user's mobile menu pills */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="flex-1 p-3 rounded-2xl bg-gradient-to-r from-[#097565] via-[#0b8a77] to-[#047857] text-white text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(9,117,101,0.4)] border border-[#43C6AC]/40 flex items-center justify-between transition cursor-pointer active:scale-[0.98]"
+            >
+              <div className="flex items-center gap-2">
+                <MenuIcon className="w-4 h-4 text-emerald-200" />
+                <span>بخش فعال: {currentTabLabel}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] font-normal text-emerald-100 bg-black/20 px-2 py-0.5 rounded-lg">
+                <span>تغییر بخش</span>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </div>
+            </button>
+          </div>
+
+          {/* Quick swipeable horizontal pills on mobile */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+            {menuItems.slice(0, 6).map((item) => {
+              const isActive = activeTab === item.id;
+              const IconComp = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`px-3 py-1.5 rounded-xl whitespace-nowrap flex items-center gap-1.5 transition text-xs cursor-pointer shrink-0 border ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[#097565] to-[#047857] text-white font-bold border-[#43C6AC]/60 shadow-sm'
+                      : 'bg-[#06100F] text-[#8BA19B] hover:text-white border-[#142824]'
+                  }`}
+                >
+                  <IconComp className="w-3.5 h-3.5" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="px-2.5 py-1.5 rounded-xl whitespace-nowrap bg-[#06100F] text-[#D4B483] border border-[#D4B483]/30 text-xs shrink-0 flex items-center gap-1"
+            >
+              <span>بیشتر...</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* MOBILE SLIDE-OVER DRAWER (مطابق دقیق با شکل منوی ارسالی در عکس تصویر)    */}
+        {/* ========================================================================= */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex justify-start bg-black/85 backdrop-blur-md animate-fade-in" dir="rtl">
+            <div className="w-[85%] max-w-[320px] h-full bg-[#030807] border-l border-[#133A33] p-4 flex flex-col justify-between overflow-y-auto shadow-2xl">
+              
+              <div className="space-y-4">
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between border-b border-[#142824] pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#09221E] border border-[#164C42] flex items-center justify-center">
+                      <User className="w-4 h-4 text-[#43C6AC]" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">منوی حساب کاربری</span>
+                      <span className="text-[10px] text-[#8BA19B]">{userData.displayName}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-8 h-8 rounded-xl bg-[#071312] border border-[#142824] text-slate-300 hover:text-white flex items-center justify-center"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* 11 Navigation Pills styled EXACTLY as image_95e7b2f6.png */}
+                <div className="space-y-2">
+                  {menuItems.map((item) => {
+                    const IconComponent = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setActiveTab(item.id);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs sm:text-[13px] font-medium transition cursor-pointer border ${
+                          isActive
+                            ? 'bg-gradient-to-r from-[#097565] via-[#0b8a77] to-[#047857] text-white font-bold border-[#43C6AC] shadow-[0_0_20px_rgba(9,117,101,0.5)]'
+                            : 'bg-[#051110] text-slate-200 hover:bg-[#0A1F1C] hover:text-white border-[#12302A]'
+                        }`}
+                      >
+                        <span className="font-bold text-right flex-1">{item.label}</span>
+                        <IconComponent className={`w-4 h-4 shrink-0 mr-2 ${isActive ? 'text-white' : 'text-[#43C6AC]'}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bottom Logout Buttons */}
+              <div className="pt-4 border-t border-[#142824] space-y-2">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (onLogout) onLogout();
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs text-[#F87171] bg-rose-950/10 border border-rose-900/30 hover:bg-rose-950/20 transition cursor-pointer"
+                >
+                  <span className="font-medium text-right flex-1">خروج از حساب</span>
+                  <LogOut className="w-4 h-4 text-[#F87171]" />
+                </button>
+              </div>
+
+            </div>
+
+            {/* Click outside to close */}
+            <div className="flex-1" onClick={() => setIsMobileMenuOpen(false)} />
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* MAIN BODY: 2 COLUMNS (RIGHT MENU ON DESKTOP, BENTO GRID CONTENT ON LEFT)   */}
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-4 items-start">
           
           {/* ======================================================================= */}
-          {/* LEFT COLUMN: ACTIVE CONTENT (RESPONDS DIRECTLY TO COMPOSITION SWITCHER) */}
+          {/* LEFT COLUMN: ACTIVE CONTENT (PURE MODERN BENTO GRID AS REQUESTED)       */}
           {/* ======================================================================= */}
           <div className="space-y-4 order-2 lg:order-1">
             
             {activeTab === 'dashboard' && (
-              <div className="space-y-4 animate-fade-in text-right">
+              <div className="space-y-3.5 animate-fade-in text-right">
                 
                 {/* ----------------------------------------------------------------- */}
-                {/* COMPOSITION 1: CLASSIC STACKED (تطابق کامل ۱:۱ با اسکرین‌شات شما) */}
+                {/* PURE MODERN BENTO GRID (تنها ترکیب حفظ‌شده به درخواست کاربر)       */}
                 {/* ----------------------------------------------------------------- */}
-                {activeComposition === 'classic-stacked' && (
-                  <div className="space-y-3.5">
-                    {/* 1. Hero Card: پنل پرونده شخصی */}
-                    <div className="rounded-2xl p-5 sm:p-6 bg-[#071312] border border-[#142824] shadow-md cyber-glow-card">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <button
-                          onClick={() => setActiveTab('portal')}
-                          className="order-2 sm:order-1 px-5 py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(9,117,101,0.4)] transition cursor-pointer flex items-center justify-center gap-2 shrink-0 self-start sm:self-auto"
-                        >
-                          <span>ورود به پنل پرونده شخصی ←</span>
-                        </button>
+                
+                {/* Top Row: 4 Metric Activity Cards with Cyber-Glow */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('charts')}>
+                    <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-[#43C6AC] transition">
+                      <Eye className="w-3.5 h-3.5 text-[#43C6AC]" />
+                      <span>تحلیل‌های من</span>
+                    </span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold font-mono text-[#43C6AC] group-hover:scale-105 transition-transform duration-200">{userData.chartsCount}</span>
+                      <span className="text-[10px] text-slate-400">چارت ناتال</span>
+                    </div>
+                  </div>
 
-                        <div className="order-1 sm:order-2 space-y-1 text-right">
-                          <h2 className="text-base sm:text-lg font-bold text-white font-serif">
-                            پنل پرونده شخصی
-                          </h2>
-                          <p className="text-xs sm:text-sm text-[#8BA19B] font-light leading-relaxed">
-                            چهار بخش پرونده، پیام مشاور و هماهنگی جلسه — همه در یک‌جا.
-                          </p>
+                  <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('club')}>
+                    <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-[#D4B483] transition">
+                      <Crown className="w-3.5 h-3.5 text-[#D4B483]" />
+                      <span>امتیاز باشگاه</span>
+                    </span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold font-mono text-[#D4B483] group-hover:scale-105 transition-transform duration-200">{userData.clubPoints}</span>
+                      <span className="text-[10px] text-[#38BDF8]">رتبه {userData.tier}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('ai')}>
+                    <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-purple-300 transition">
+                      <Brain className="w-3.5 h-3.5 text-purple-400" />
+                      <span>پرسش هوش</span>
+                    </span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold font-mono text-white group-hover:text-[#43C6AC] group-hover:scale-105 transition-all duration-200">{userData.aiCount}</span>
+                      <span className="text-[10px] text-slate-400">آرماهوش</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group">
+                    <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-amber-400 transition">
+                      <Flame className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                      <span>استریک حضور</span>
+                    </span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold font-mono text-amber-400 group-hover:scale-105 transition-transform duration-200">{userData.streakDays}</span>
+                      <span className="text-[10px] text-slate-400">روز متوالی</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bento Grid: 2 Columns */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+                  
+                  {/* Right Bento Column: 7 Cols (Dossier & AI Interactive) */}
+                  <div className="md:col-span-7 space-y-3.5">
+                    
+                    {/* Dossier Bento Card with Cyber-Glow */}
+                    <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-4 cyber-glow-card">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 text-[10px] font-bold">
+                          پرونده متمرکز
+                        </span>
+                        <h3 className="text-base font-bold text-white font-serif">پنل پرونده شخصی</h3>
+                      </div>
+                      
+                      <p className="text-xs text-[#8BA19B] leading-relaxed">
+                        چهار بخش پرونده، پیام مشاور و هماهنگی جلسه — همه در یک‌جا.
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/50 transition-colors duration-200 space-y-0.5 group">
+                          <span className="text-[11px] text-[#43C6AC] font-bold block group-hover:text-emerald-300">طبع و مزاج</span>
+                          <span className="text-[10px] text-slate-300">گرم و خشک (صفراوی)</span>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/50 transition-colors duration-200 space-y-0.5 group">
+                          <span className="text-[11px] text-[#43C6AC] font-bold block group-hover:text-emerald-300">طالع ناتال</span>
+                          <span className="text-[10px] text-slate-300">اسد ♌ · طالع میزان ♎</span>
                         </div>
                       </div>
+
+                      <button
+                        onClick={() => setActiveTab('portal')}
+                        className="w-full py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                      >
+                        <span>ورود به پنل پرونده شخصی ←</span>
+                      </button>
                     </div>
 
-                    {/* 2. Quickstart Card: از کجا شروع کنم؟ */}
-                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md cyber-glow-card">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <button
-                          onClick={() => setActiveTab('courses')}
-                          className="order-2 sm:order-1 px-4 py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold shadow-[0_0_15px_rgba(9,117,101,0.3)] transition cursor-pointer shrink-0 self-start sm:self-auto"
-                        >
-                          <span>شروع سریع در راهنمای آرمانوین</span>
-                        </button>
-
-                        <div className="order-1 sm:order-2 space-y-1 text-right">
-                          <h3 className="text-sm sm:text-base font-bold text-white">
-                            از کجا شروع کنم؟
-                          </h3>
-                          <p className="text-xs text-[#8BA19B] font-light leading-relaxed">
-                            راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره، با نقشۀ دکمه‌ها.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 3. Next Action Card: الان آرماهوش را روی چارتت باز کن */}
-                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md cyber-glow-card">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Interactive Armahosh Card with Cyber-Glow */}
+                    <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
+                      <div className="flex items-center justify-between">
                         <button
                           onClick={() => setActiveTab('ai')}
-                          className="order-2 sm:order-1 px-5 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold shadow-[0_0_15px_rgba(9,117,101,0.3)] transition cursor-pointer shrink-0 self-start sm:self-auto"
+                          className="text-xs text-[#43C6AC] hover:underline"
                         >
-                          <span>برو</span>
+                          صفحه کامل آرماهوش ←
                         </button>
-
-                        <div className="order-1 sm:order-2 space-y-1 text-right">
-                          <h3 className="text-sm sm:text-base font-bold text-white">
-                            الان آرماهوش را روی چارتت باز کن
-                          </h3>
-                          <p className="text-xs text-[#8BA19B] font-light leading-relaxed">
-                            سه لایۀ روان، مزاج و آسمان روی همین صفحه جمع می‌شود.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 4. Stat Chips Bar matching image.png */}
-                    <div className="rounded-2xl p-3.5 sm:p-4 bg-[#071312] border border-[#142824] shadow-md flex flex-wrap items-center justify-start gap-2 cyber-glow-card">
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#09221E] border border-[#164C42] text-[#43C6AC] text-xs font-bold flex items-center gap-1.5">
-                        <b className="font-mono">{userData.chartsCount}</b>
-                        <span>تحلیل ساخته‌شده</span>
-                      </span>
-
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs font-medium flex items-center gap-1.5">
-                        <b className="font-mono text-emerald-400">{userData.clubPoints}</b>
-                        <span>امتیاز باشگاه</span>
-                      </span>
-
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#D4B483] text-xs font-medium">
-                        رتبهٔ {userData.tier}
-                      </span>
-
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs flex items-center gap-1.5">
-                        <b className="font-mono text-white">{userData.aiCount}</b>
-                        <span>پرسش هوش مصنوعی</span>
-                      </span>
-
-                      <span className="px-3 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#8BA19B] text-xs font-mono">
-                        □ …
-                      </span>
-
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#081716] border border-[#142C27] text-[#A9BAB4] text-xs flex items-center gap-1.5">
-                        <b className="font-mono text-white">{userData.invitedCount}</b>
-                        <span>دعوت موفق</span>
-                      </span>
-                    </div>
-
-                    {/* 5. Missions Section: ★ مأموریت‌های تو */}
-                    <div className="rounded-2xl p-5 bg-[#071312] border border-[#142824] shadow-md space-y-3">
-                      <div className="flex items-center justify-between pb-1">
-                        <span className="text-[11px] text-[#8BA19B]">
-                          با انجام هر مأموریت امتیاز باشگاه دریافت کنید
-                        </span>
-
                         <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                          <span>★ مأموریت‌های تو</span>
+                          <Brain className="w-4 h-4 text-[#43C6AC]" />
+                          <span>الان آرماهوش را روی چارتت باز کن</span>
                         </h3>
                       </div>
 
+                      <p className="text-xs text-[#8BA19B]">
+                        سه لایۀ روان، مزاج و آسمان روی همین صفحه جمع می‌شود.
+                      </p>
+
+                      {/* Quick chips */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {['تحلیل ترانزیت امروز', 'توصیه مزاجی من'].map((chip, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleQuickAskAi(chip)}
+                            className="px-2.5 py-1 rounded-lg bg-[#081816] hover:bg-[#0E2824] text-[#43C6AC] hover:text-white border border-[#164239] hover:border-[#43C6AC]/60 text-[11px] transition cursor-pointer"
+                          >
+                            {chip}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={quickAiQuestion}
+                          onChange={(e) => setQuickAiQuestion(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleQuickAskAi()}
+                          placeholder="سؤال خود را بنویسید..."
+                          className="flex-1 bg-[#06100F] border border-[#142824] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#43C6AC] text-right"
+                        />
+                        <button
+                          onClick={() => handleQuickAskAi()}
+                          disabled={isAiLoading}
+                          className="px-4 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold cursor-pointer transition shadow-sm"
+                        >
+                          {isAiLoading ? '...' : 'برو'}
+                        </button>
+                      </div>
+
+                      {quickAiAnswer && (
+                        <div className="p-3 rounded-xl bg-[#081C18] border border-[#1E4D43] text-xs text-[#A9BAB4] leading-relaxed animate-fade-in">
+                          <strong className="block text-[#43C6AC] mb-1">پاسخ آرماهوش:</strong>
+                          {quickAiAnswer}
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+
+                  {/* Left Bento Column: 5 Cols (Guide & Missions) */}
+                  <div className="md:col-span-5 space-y-3.5">
+                    
+                    {/* Guide Card with Cyber-Glow */}
+                    <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
+                      <h3 className="text-sm font-bold text-white">از کجا شروع کنم؟</h3>
+                      <p className="text-xs text-[#8BA19B] leading-relaxed">
+                        راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره، با نقشۀ دکمه‌ها.
+                      </p>
+
+                      <div className="space-y-1.5 text-xs text-slate-300">
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
+                          <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۱</span>
+                          <span>تکمیل پروفایل و تولد</span>
+                        </div>
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
+                          <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۲</span>
+                          <span>مشاهده نقشه آسمان</span>
+                        </div>
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
+                          <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۳</span>
+                          <span>پرسش از آرماهوش</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setActiveTab('courses')}
+                        className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer shadow-sm"
+                      >
+                        شروع سریع در راهنمای آرمانوین
+                      </button>
+                    </div>
+
+                    {/* Missions Bento Card with Cyber-Glow */}
+                    <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[#43C6AC] font-mono">
+                          {missions.filter(m => m.done).length} از {missions.length} انجام شده
+                        </span>
+                        <h3 className="text-sm font-bold text-white">★ مأموریت‌های تو</h3>
+                      </div>
+
                       <div className="space-y-2">
-                        {missions.map((m) => (
+                        {missions.slice(0, 4).map((m) => (
                           <div
                             key={m.id}
-                            className={`p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
+                            className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 transition-all duration-200 ${
                               m.done 
-                                ? 'bg-[#091D1A]/50 border-emerald-900/60 opacity-80' 
-                                : 'bg-[#06100F] border-[#122421] hover:border-[#1E3B34]'
+                                ? 'bg-[#091D1A]/40 border-emerald-900/40 opacity-70' 
+                                : 'bg-[#06100F] border-[#142824] hover:border-[#43C6AC]/50 hover:bg-[#091D1A]/30'
                             }`}
                           >
                             <button
                               onClick={() => handleToggleMission(m.id)}
-                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer shrink-0 border ${
-                                m.done 
-                                  ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' 
-                                  : 'bg-[#081514] hover:bg-[#0E201E] text-white border-[#19322D]'
+                              className={`px-2.5 py-1 rounded text-[11px] font-medium border transition cursor-pointer ${
+                                m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#081514] hover:bg-[#0E201E] text-white border-[#19322D]'
                               }`}
                             >
-                              {m.done ? 'انجام شد ✓' : m.hrefText}
+                              {m.done ? '✓' : m.hrefText}
                             </button>
-
-                            <div className="flex items-center gap-3 text-right">
-                              <span className="text-xs font-bold text-[#43C6AC] font-mono">
-                                {m.points}+
-                              </span>
-                              <span className={`text-xs sm:text-[13px] ${m.done ? 'line-through text-slate-400' : 'text-[#E8E2D5]'}`}>
+                            <div className="text-right flex-1 truncate">
+                              <span className={`truncate block ${m.done ? 'line-through text-slate-400' : 'text-[#E8E2D5]'}`}>
                                 {m.title}
                               </span>
-                              <span className="text-sm">
-                                {m.done ? '✓' : '□'}
-                              </span>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* ----------------------------------------------------------------- */}
-                {/* COMPOSITION 2: BENTO GRID (چیدمان شبکه‌ای مدرن و ۲ ستونه)          */}
-                {/* ----------------------------------------------------------------- */}
-                {activeComposition === 'bento-grid' && (
-                  <div className="space-y-3.5 animate-fade-in">
-                    
-                    {/* Top Row: 4 Metric Cards with Cyber-Glow */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('charts')}>
-                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-[#43C6AC] transition">
-                          <Eye className="w-3.5 h-3.5 text-[#43C6AC]" />
-                          <span>تحلیل‌های من</span>
-                        </span>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-bold font-mono text-[#43C6AC] group-hover:scale-105 transition-transform duration-200">{userData.chartsCount}</span>
-                          <span className="text-[10px] text-slate-400">چارت ناتال</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('club')}>
-                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-[#D4B483] transition">
-                          <Crown className="w-3.5 h-3.5 text-[#D4B483]" />
-                          <span>امتیاز باشگاه</span>
-                        </span>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-bold font-mono text-[#D4B483] group-hover:scale-105 transition-transform duration-200">{userData.clubPoints}</span>
-                          <span className="text-[10px] text-[#38BDF8]">رتبه {userData.tier}</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group" onClick={() => setActiveTab('ai')}>
-                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-purple-300 transition">
-                          <Brain className="w-3.5 h-3.5 text-purple-400" />
-                          <span>پرسش هوش</span>
-                        </span>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-bold font-mono text-white group-hover:text-[#43C6AC] group-hover:scale-105 transition-all duration-200">{userData.aiCount}</span>
-                          <span className="text-[10px] text-slate-400">آرماهوش</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-[#071312] border border-[#142824] text-right space-y-1 cyber-glow-card cursor-pointer group">
-                        <span className="text-[11px] text-[#8BA19B] flex items-center gap-1 group-hover:text-amber-400 transition">
-                          <Flame className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                          <span>استریک حضور</span>
-                        </span>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-bold font-mono text-amber-400 group-hover:scale-105 transition-transform duration-200">{userData.streakDays}</span>
-                          <span className="text-[10px] text-slate-400">روز متوالی</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bento Grid: 2 Columns */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
-                      
-                      {/* Right Bento Column: 7 Cols (Dossier & AI Interactive) */}
-                      <div className="md:col-span-7 space-y-3.5">
-                        
-                        {/* Dossier Bento Card with Cyber-Glow */}
-                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-4 cyber-glow-card">
-                          <div className="flex items-center justify-between">
-                            <span className="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 text-[10px] font-bold">
-                              پرونده متمرکز
-                            </span>
-                            <h3 className="text-base font-bold text-white font-serif">پنل پرونده شخصی</h3>
-                          </div>
-                          
-                          <p className="text-xs text-[#8BA19B] leading-relaxed">
-                            چهار بخش پرونده، پیام مشاور و هماهنگی جلسه — همه در یک‌جا.
-                          </p>
-
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/50 transition-colors duration-200 space-y-0.5 group">
-                              <span className="text-[11px] text-[#43C6AC] font-bold block group-hover:text-emerald-300">طبع و مزاج</span>
-                              <span className="text-[10px] text-slate-300">گرم و خشک (صفراوی)</span>
-                            </div>
-                            <div className="p-2.5 rounded-xl bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/50 transition-colors duration-200 space-y-0.5 group">
-                              <span className="text-[11px] text-[#43C6AC] font-bold block group-hover:text-emerald-300">طالع ناتال</span>
-                              <span className="text-[10px] text-slate-300">اسد ♌ · طالع میزان ♎</span>
-                            </div>
-                          </div>
-
-                          <button
-                            onClick={() => setActiveTab('portal')}
-                            className="w-full py-2.5 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md"
-                          >
-                            <span>ورود به پنل پرونده شخصی ←</span>
-                          </button>
-                        </div>
-
-                        {/* Interactive Armahosh Card with Cyber-Glow */}
-                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
-                          <div className="flex items-center justify-between">
-                            <button
-                              onClick={() => setActiveTab('ai')}
-                              className="text-xs text-[#43C6AC] hover:underline"
-                            >
-                              صفحه کامل آرماهوش ←
-                            </button>
-                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                              <Brain className="w-4 h-4 text-[#43C6AC]" />
-                              <span>الان آرماهوش را روی چارتت باز کن</span>
-                            </h3>
-                          </div>
-
-                          <p className="text-xs text-[#8BA19B]">
-                            سه لایۀ روان، مزاج و آسمان روی همین صفحه جمع می‌شود.
-                          </p>
-
-                          {/* Quick chips */}
-                          <div className="flex flex-wrap gap-1.5">
-                            {['تحلیل ترانزیت امروز', 'توصیه مزاجی من'].map((chip, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => handleQuickAskAi(chip)}
-                                className="px-2.5 py-1 rounded-lg bg-[#081816] hover:bg-[#0E2824] text-[#43C6AC] hover:text-white border border-[#164239] hover:border-[#43C6AC]/60 text-[11px] transition cursor-pointer"
-                              >
-                                {chip}
-                              </button>
-                            ))}
-                          </div>
-
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={quickAiQuestion}
-                              onChange={(e) => setQuickAiQuestion(e.target.value)}
-                              onKeyDown={(e) => e.key === 'Enter' && handleQuickAskAi()}
-                              placeholder="سؤال خود را بنویسید..."
-                              className="flex-1 bg-[#06100F] border border-[#142824] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#43C6AC] text-right"
-                            />
-                            <button
-                              onClick={() => handleQuickAskAi()}
-                              disabled={isAiLoading}
-                              className="px-4 py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold cursor-pointer transition shadow-sm"
-                            >
-                              {isAiLoading ? '...' : 'برو'}
-                            </button>
-                          </div>
-
-                          {quickAiAnswer && (
-                            <div className="p-3 rounded-xl bg-[#081C18] border border-[#1E4D43] text-xs text-[#A9BAB4] leading-relaxed animate-fade-in">
-                              <strong className="block text-[#43C6AC] mb-1">پاسخ آرماهوش:</strong>
-                              {quickAiAnswer}
-                            </div>
-                          )}
-                        </div>
-
-                      </div>
-
-                      {/* Left Bento Column: 5 Cols (Guide & Missions) */}
-                      <div className="md:col-span-5 space-y-3.5">
-                        
-                        {/* Guide Card with Cyber-Glow */}
-                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
-                          <h3 className="text-sm font-bold text-white">از کجا شروع کنم؟</h3>
-                          <p className="text-xs text-[#8BA19B] leading-relaxed">
-                            راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره، با نقشۀ دکمه‌ها.
-                          </p>
-
-                          <div className="space-y-1.5 text-xs text-slate-300">
-                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
-                              <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۱</span>
-                              <span>تکمیل پروفایل و تولد</span>
-                            </div>
-                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
-                              <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۲</span>
-                              <span>مشاهده نقشه آسمان</span>
-                            </div>
-                            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#06100F] border border-[#142824] hover:border-[#43C6AC]/40 transition">
-                              <span className="w-4 h-4 rounded-full bg-[#097565] text-white flex items-center justify-center text-[10px] font-bold">۳</span>
-                              <span>پرسش از آرماهوش</span>
-                            </div>
-                          </div>
-
-                          <button
-                            onClick={() => setActiveTab('courses')}
-                            className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer shadow-sm"
-                          >
-                            شروع سریع در راهنمای آرمانوین
-                          </button>
-                        </div>
-
-                        {/* Missions Bento Card with Cyber-Glow */}
-                        <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 cyber-glow-card">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-[#43C6AC] font-mono">
-                              {missions.filter(m => m.done).length} از {missions.length} انجام شده
-                            </span>
-                            <h3 className="text-sm font-bold text-white">★ مأموریت‌های تو</h3>
-                          </div>
-
-                          <div className="space-y-2">
-                            {missions.slice(0, 4).map((m) => (
-                              <div
-                                key={m.id}
-                                className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 transition-all duration-200 ${
-                                  m.done 
-                                    ? 'bg-[#091D1A]/40 border-emerald-900/40 opacity-70' 
-                                    : 'bg-[#06100F] border-[#142824] hover:border-[#43C6AC]/50 hover:bg-[#091D1A]/30'
-                                }`}
-                              >
-                                <button
-                                  onClick={() => handleToggleMission(m.id)}
-                                  className={`px-2.5 py-1 rounded text-[11px] font-medium border transition cursor-pointer ${
-                                    m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#081514] hover:bg-[#0E201E] text-white border-[#19322D]'
-                                  }`}
-                                >
-                                  {m.done ? '✓' : m.hrefText}
-                                </button>
-                                <div className="text-right flex-1 truncate">
-                                  <span className={`truncate block ${m.done ? 'line-through text-slate-400' : 'text-[#E8E2D5]'}`}>
-                                    {m.title}
-                                  </span>
-                                </div>
-                                <span className="font-mono text-[#43C6AC] font-bold text-[11px]">{m.points}+</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                      </div>
-
-                    </div>
-                  </div>
-                )}
-
-                {/* ----------------------------------------------------------------- */}
-                {/* COMPOSITION 3: TRI-PILLARS (آسمان | تن و مزاج | روان و هوش)       */}
-                {/* ----------------------------------------------------------------- */}
-                {activeComposition === 'tri-pillars' && (
-                  <div className="space-y-3.5 animate-fade-in">
-                    
-                    {/* Top Philosophy Intro */}
-                    <div className="p-4 rounded-2xl bg-[#071312] border border-[#1E433C] flex items-center justify-between">
-                      <span className="text-xs text-[#8BA19B]">چیدمان متمرکز بر سه ستون اصیل آرمان‌وین</span>
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-1 rounded-lg bg-[#09221E] text-[#43C6AC] text-xs font-bold border border-[#164C42]">
-                          آسمان · تن · روان
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 3 Pillars Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      
-                      {/* Pillar 1: آسمان و چارت */}
-                      <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 text-right flex flex-col justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between border-b border-[#142824] pb-2">
-                            <span className="text-[10px] text-[#43C6AC] font-bold bg-[#09221E] px-2 py-0.5 rounded">ستاد آسمان</span>
-                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                              <Compass className="w-4 h-4 text-[#43C6AC]" />
-                              <span>۱. نقشه آسمان</span>
-                            </h3>
-                          </div>
-
-                          <p className="text-xs text-[#8BA19B]">
-                            چارت ناتال، مدار خورشید و گذر کواکب
-                          </p>
-
-                          <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">برج خورشیدی:</span>
-                              <span className="font-bold text-[#43C6AC]">{userData.sunSign}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">طالع صعودی:</span>
-                              <span className="font-bold text-white">{userData.ascendant}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">سیاره حاکم:</span>
-                              <span className="font-bold text-[#D4B483]">{userData.rulerPlanet}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => setActiveTab('charts')}
-                          className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer"
-                        >
-                          مشاهده چارت‌ها ←
-                        </button>
-                      </div>
-
-                      {/* Pillar 2: تن و مزاج */}
-                      <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 text-right flex flex-col justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between border-b border-[#142824] pb-2">
-                            <span className="text-[10px] text-[#D4B483] font-bold bg-[#141F1A] px-2 py-0.5 rounded">ستاد تن</span>
-                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                              <Flame className="w-4 h-4 text-[#D4B483]" />
-                              <span>۲. طبع و مزاج</span>
-                            </h3>
-                          </div>
-
-                          <p className="text-xs text-[#8BA19B]">
-                            ارکان چهارگانه بدن، تدابیر فصلی و سلامت
-                          </p>
-
-                          <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">طبع سرشتی:</span>
-                              <span className="font-bold text-white">گرم و خشک</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">خلط غالب:</span>
-                              <span className="font-bold text-[#D4B483]">صفراوی تعدیل‌شده</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">تدبیر فصل:</span>
-                              <span className="font-bold text-emerald-400">تعدیل خشکی پاییز</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => setActiveTab('portal')}
-                          className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer"
-                        >
-                          پنل پرونده شخصی ←
-                        </button>
-                      </div>
-
-                      {/* Pillar 3: روان و کهن‌الگو */}
-                      <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-3 text-right flex flex-col justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between border-b border-[#142824] pb-2">
-                            <span className="text-[10px] text-purple-400 font-bold bg-[#1A1624] px-2 py-0.5 rounded">ستاد روان</span>
-                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                              <Brain className="w-4 h-4 text-purple-400" />
-                              <span>۳. روان و آرماهوش</span>
-                            </h3>
-                          </div>
-
-                          <p className="text-xs text-[#8BA19B]">
-                            کهن‌الگوهای یونگی، سایه‌ها و هوش مصنوعی
-                          </p>
-
-                          <div className="p-3 rounded-xl bg-[#06100F] border border-[#142824] space-y-1 text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">کهن‌الگو:</span>
-                              <span className="font-bold text-white">جوینده و خردمند</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">وضعیت سایه:</span>
-                              <span className="font-bold text-purple-300">در حال یکپارچه‌سازی</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-[#8BA19B]">آرماهوش:</span>
-                              <span className="font-bold text-[#43C6AC]">آماده پرسش</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => setActiveTab('ai')}
-                          className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition cursor-pointer"
-                        >
-                          الان آرماهوش را باز کن ←
-                        </button>
-                      </div>
-
-                    </div>
-
-                    {/* Integrated Missions for Tri-Pillars */}
-                    <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-[#8BA19B]">مأموریت‌های توزیع‌شده بر سه ساحت</span>
-                        <h3 className="text-sm font-bold text-white">★ مأموریت‌های هفتگی</h3>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        {missions.slice(0, 4).map((m) => (
-                          <div key={m.id} className="p-3 rounded-xl bg-[#06100F] border border-[#142824] flex items-center justify-between gap-2">
-                            <button
-                              onClick={() => handleToggleMission(m.id)}
-                              className={`px-3 py-1 rounded text-xs font-medium border ${
-                                m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#081514] text-white border-[#19322D]'
-                              }`}
-                            >
-                              {m.done ? 'انجام شد ✓' : m.hrefText}
-                            </button>
-                            <span className="text-right truncate">{m.title}</span>
+                            <span className="font-mono text-[#43C6AC] font-bold text-[11px]">{m.points}+</span>
                           </div>
                         ))}
                       </div>
                     </div>
 
                   </div>
-                )}
 
-                {/* ----------------------------------------------------------------- */}
-                {/* COMPOSITION 4: COCKPIT COMMAND (کابین خلبانی و مرکز عملیات پیشرفت) */}
-                {/* ----------------------------------------------------------------- */}
-                {activeComposition === 'cockpit-command' && (
-                  <div className="space-y-3.5 animate-fade-in">
-                    
-                    {/* Cockpit Status Toolbar */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-r from-[#071715] via-[#071312] to-[#0B2520] border-2 border-[#1E433C] flex flex-wrap items-center justify-between gap-3 text-xs">
-                      <div className="flex items-center gap-3">
-                        <span className="px-3 py-1.5 rounded-xl bg-[#09221E] text-[#43C6AC] font-bold border border-[#164C42] flex items-center gap-1.5">
-                          <Flame className="w-4 h-4 text-amber-500 animate-pulse" />
-                          <span>استریک فعال: {userData.streakDays} روز پیوسته</span>
-                        </span>
-                        <span className="text-white font-mono">
-                          سطح {userData.tier} · {userData.clubPoints} امتیاز
-                        </span>
-                      </div>
+                </div>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setShowWalletModal(true)}
-                          className="px-3 py-1 rounded-lg bg-[#097565] text-white font-bold"
-                        >
-                          + شارژ کیف پول ({userData.balanceToman} ت)
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Cockpit 2-Column Split: Actions Pod & Quest Center */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                      
-                      {/* Left Pod: 3 Quick Action Cards */}
-                      <div className="space-y-3">
-                        <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-2 text-right">
-                          <span className="text-[10px] text-[#43C6AC] font-bold uppercase tracking-wider block">اکشن شماره ۱</span>
-                          <h3 className="text-sm font-bold text-white">پنل پرونده شخصی</h3>
-                          <p className="text-xs text-[#8BA19B]">چهار بخش پرونده، پیام مشاور و هماهنگی جلسه — همه در یک‌جا.</p>
-                          <button
-                            onClick={() => setActiveTab('portal')}
-                            className="w-full py-2 rounded-xl bg-[#097565] hover:bg-[#0c8a77] text-white text-xs font-bold transition"
-                          >
-                            ورود مستقیم به پرونده ←
-                          </button>
-                        </div>
-
-                        <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-2 text-right">
-                          <span className="text-[10px] text-[#D4B483] font-bold uppercase tracking-wider block">اکشن شماره ۲</span>
-                          <h3 className="text-sm font-bold text-white">الان آرماهوش را روی چارتت باز کن</h3>
-                          <p className="text-xs text-[#8BA19B]">سه لایۀ روان، مزاج و آسمان روی همین صفحه جمع می‌شود.</p>
-                          <button
-                            onClick={() => setActiveTab('ai')}
-                            className="w-full py-2 rounded-xl bg-[#081816] hover:bg-[#0E2824] border border-[#164239] text-[#43C6AC] text-xs font-bold transition"
-                          >
-                            باز کردن کنسول آرماهوش ←
-                          </button>
-                        </div>
-
-                        <div className="p-4 rounded-2xl bg-[#071312] border border-[#142824] space-y-2 text-right">
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">اکشن شماره ۳</span>
-                          <h3 className="text-sm font-bold text-white">از کجا شروع کنم؟</h3>
-                          <p className="text-xs text-[#8BA19B]">راهنمای قدم‌به‌قدم سایت — چهار قدم از حساب تا پروندۀ مشاوره.</p>
-                          <button
-                            onClick={() => setActiveTab('courses')}
-                            className="w-full py-2 rounded-xl bg-[#06100F] hover:bg-[#0A1A18] border border-[#142824] text-slate-200 text-xs font-bold transition"
-                          >
-                            راهنمای قدم‌به‌قدم آرمانوین ←
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Right Pod: Quest Center (مأموریت‌های فعال) */}
-                      <div className="p-5 rounded-2xl bg-[#071312] border border-[#142824] space-y-3.5 text-right flex flex-col justify-between">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between border-b border-[#142824] pb-2">
-                            <span className="text-xs font-mono text-[#D4B483] font-bold">
-                              {missions.reduce((acc, m) => acc + (m.done ? m.points : 0), 0)} امتیاز کسب‌شده
-                            </span>
-                            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                              <Award className="w-4 h-4 text-amber-400" />
-                              <span>مرکز مأموریت‌ها و چالش‌ها</span>
-                            </h3>
-                          </div>
-
-                          <div className="space-y-2">
-                            {missions.map((m) => (
-                              <div
-                                key={m.id}
-                                className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${
-                                  m.done ? 'bg-[#091D1A]/50 border-emerald-900/60' : 'bg-[#06100F] border-[#142824]'
-                                }`}
-                              >
-                                <button
-                                  onClick={() => handleToggleMission(m.id)}
-                                  className={`px-3 py-1 rounded text-xs font-bold transition border ${
-                                    m.done ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-[#097565] text-white border-transparent'
-                                  }`}
-                                >
-                                  {m.done ? 'انجام شد ✓' : 'انجام و دریافت'}
-                                </button>
-
-                                <div className="text-right flex-1 truncate">
-                                  <span className={`block truncate ${m.done ? 'line-through text-slate-400' : 'text-white'}`}>
-                                    {m.title}
-                                  </span>
-                                </div>
-
-                                <span className="text-xs font-mono font-bold text-[#43C6AC]">
-                                  {m.points}+
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={handleCopyInvite}
-                          className="w-full py-2.5 rounded-xl bg-[#0A1A18] hover:bg-[#0E2421] text-[#D4B483] border border-[#D4B483]/30 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-                        >
-                          <Sparkles className="w-3.5 h-3.5 text-[#D4B483]" />
-                          <span>{copiedInvite ? 'لینک کپی شد!' : '✦ دعوت دوستان و دریافت ۵۰ امتیاز'}</span>
-                        </button>
-                      </div>
-
-                    </div>
-
-                  </div>
-                )}
+                {/* Dashboard Action Buttons */}
+                <div className="flex flex-wrap items-center justify-start gap-2.5 pt-1">
+                  <button
+                    onClick={handleCopyInvite}
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-[#0A1A18] hover:bg-[#0E2421] text-[#D4B483] border border-[#D4B483]/30 transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#D4B483]" />
+                    <span>{copiedInvite ? 'لینک کپی شد!' : '✦ دعوت دوستان و جایزه'}</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('support')}
+                    className="px-4 py-2 rounded-xl text-xs font-medium bg-[#071312] hover:bg-[#0B1E1C] text-[#8BA19B] hover:text-white border border-[#142824] transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Headphones className="w-3.5 h-3.5" />
+                    <span>پشتیبانی و راهنما</span>
+                  </button>
+                </div>
 
               </div>
             )}
 
             {/* ======================================================================= */}
-            {/* SUB-TABS: FULLY BUILT ACCORDING TO USER'S SPECIALIZED DESIGN            */}
+            {/* SUB-TABS: FULLY FUNCTIONAL                                              */}
             {/* ======================================================================= */}
 
             {/* TAB: مینی دوره‌ها */}
             {activeTab === 'courses' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">مینی دوره‌های من</h3>
@@ -1298,7 +906,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: تحلیل‌های من (چارت‌ها) */}
             {activeTab === 'charts' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">تحلیل‌های آسمان من</h3>
@@ -1317,15 +925,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                   {userCharts.map((ch) => (
                     <div key={ch.id} className="p-4 sm:p-5 rounded-2xl bg-[#06100F] border border-[#142824] space-y-3">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 order-2 sm:order-1">
-                          <button 
-                            onClick={() => setActiveComposition('tri-pillars')}
-                            className="px-3.5 py-1.5 rounded-lg bg-[#09221E] hover:bg-[#0E332D] text-[#43C6AC] border border-[#164C42] text-xs font-medium cursor-pointer"
-                          >
-                            مشاهده دایره‌البروج
-                          </button>
-                        </div>
-                        <div className="space-y-1 text-right order-1 sm:order-2">
+                        <div className="space-y-1 text-right">
                           <div className="flex items-center gap-2">
                             <span className="px-2 py-0.5 rounded bg-[#0A1A18] text-[#D4B483] border border-[#142824] text-[10px]">
                               {ch.type}
@@ -1354,7 +954,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: هوش مصنوعی آرماهوش */}
             {activeTab === 'ai' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-5 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-5 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">دستیار تحلیلی آرماهوش</h3>
@@ -1431,7 +1031,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: سفارش‌ها */}
             {activeTab === 'orders' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-5 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-5 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4">
                   <h3 className="text-lg font-bold text-white font-serif">سفارش‌ها و بسته‌ها</h3>
                   <p className="text-xs text-[#8BA19B]">تاریخچه خرید بسته‌های آموزشی، تحلیل ناتال و مشاوره‌ها</p>
@@ -1462,7 +1062,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: کیف پول */}
             {activeTab === 'wallet' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">کیف پول آرمانوین</h3>
@@ -1509,7 +1109,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: کسب درآمد */}
             {activeTab === 'income' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4">
                   <h3 className="text-lg font-bold text-white font-serif">کسب درآمد و معرفی دوستان</h3>
                   <p className="text-xs text-[#8BA19B]">با معرفی آرمانوین به علاقه‌مندان خودشناسی، ۲۰٪ از هر خرید به عنوان پاداش به کیف پول شما اضافه می‌شود</p>
@@ -1553,7 +1153,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: باشگاه مشتریان */}
             {activeTab === 'club' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">باشگاه مشتریان و امتیازات</h3>
@@ -1610,7 +1210,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: پنل پرونده شخصی */}
             {activeTab === 'portal' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">پنل پرونده شخصی یکپارچه</h3>
@@ -1661,7 +1261,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: تیکت‌های من */}
             {activeTab === 'support' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif">تیکت‌های پشتیبانی و مشاوره</h3>
@@ -1703,7 +1303,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
 
             {/* TAB: اطلاعات حساب کاربری */}
             {activeTab === 'profile' && (
-              <div className="rounded-2xl p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in">
+              <div className="rounded-2xl p-4 sm:p-6 bg-[#071312] border border-[#142824] shadow-md space-y-6 text-right animate-fade-in cyber-glow-card">
                 <div className="border-b border-[#142824] pb-4">
                   <h3 className="text-lg font-bold text-white font-serif">اطلاعات حساب کاربری</h3>
                   <p className="text-xs text-[#8BA19B]">مشخصات فردی و اطلاعات تولد برای محاسبه دقیق چارت و پرونده</p>
@@ -1785,10 +1385,10 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
           </div>
 
           {/* ======================================================================= */}
-          {/* RIGHT COLUMN: SIDEBAR MENU (EXACT MATCH TO IMAGE.PNG)                   */}
+          {/* RIGHT COLUMN: DESKTOP SIDEBAR MENU (EXACT MATCH TO IMAGE.PNG)           */}
           {/* ======================================================================= */}
-          <div className="order-1 lg:order-2 space-y-2">
-            <div className="rounded-2xl p-2.5 sm:p-3 bg-[#071312] border border-[#142824] shadow-md space-y-1">
+          <div className="hidden lg:block order-1 lg:order-2 space-y-2 sticky top-20">
+            <div className="rounded-2xl p-2.5 sm:p-3 bg-[#071312] border border-[#142824] shadow-md space-y-1 cyber-glow-card">
               {menuItems.map((item) => {
                 const IconComponent = item.icon;
                 const isActive = activeTab === item.id;
@@ -1798,7 +1398,7 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
                     onClick={() => setActiveTab(item.id)}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-medium transition cursor-pointer ${
                       isActive
-                        ? 'bg-[#097565] text-white font-bold shadow-[0_0_15px_rgba(9,117,101,0.35)]'
+                        ? 'bg-gradient-to-r from-[#097565] to-[#047857] text-white font-bold shadow-[0_0_15px_rgba(9,117,101,0.35)] border border-[#43C6AC]/40'
                         : 'text-[#A9BAB4] hover:bg-[#0C1E1B] hover:text-white'
                     }`}
                   >

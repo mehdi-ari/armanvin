@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Menu, X, RotateCcw, Monitor, Tablet, Smartphone, LogIn, Sparkles, ChevronDown, User } from 'lucide-react';
+import { 
+  Menu, X, RotateCcw, Monitor, Tablet, Smartphone, LogIn, Sparkles, 
+  ChevronDown, User, Sun, Brain, Eye, Leaf, Heart, BookOpen 
+} from 'lucide-react';
 import { DeviceMode, HeaderFooterStyle } from '../../types';
 import { ArmanveinLogo } from './ArmanveinLogo';
 
@@ -39,16 +42,17 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Exact 8 items from authentic Armanvein Header in image_0bfcb414.png:
-  const navTabs: { id: ArmanveinNavTab; label: string; numberStr: string }[] = [
-    { id: 'خانه' as unknown as ArmanveinNavTab, label: 'خانه', numberStr: '۰۱' },
-    { id: 'armahush', label: 'آرماهوش', numberStr: '۰۲' },
-    { id: 'astrology', label: 'آسترولوژی', numberStr: '۰۳' },
-    { id: 'temperament', label: 'مزاج‌شناسی', numberStr: '۰۴' },
-    { id: 'psychology', label: 'روانشناسی', numberStr: '۰۵' },
-    { id: 'package', label: 'پکیج', numberStr: '۰۶' },
-    { id: 'minicourses', label: 'مینی دوره‌ها', numberStr: '۰۷' },
-    { id: 'guide', label: 'راهنمای آرمانوین', numberStr: '۰۸' },
+  // Exact items from authentic Armanvein Header and mobile menu in image_95e7b2f6.png:
+  const navTabs: { id: ArmanveinNavTab; label: string; numberStr: string; icon: React.ElementType }[] = [
+    { id: 'home', label: 'خانه', numberStr: '۰۱', icon: Sun },
+    { id: 'armahush', label: 'آرماهوش', numberStr: '۰۲', icon: Brain },
+    { id: 'astrology', label: 'آسترولوژی', numberStr: '۰۳', icon: Eye },
+    { id: 'temperament', label: 'مزاج‌شناسی', numberStr: '۰۴', icon: Leaf },
+    { id: 'psychology', label: 'روانشناسی', numberStr: '۰۵', icon: Eye },
+    { id: 'package', label: 'پکیج', numberStr: '۰۶', icon: Heart },
+    { id: 'minicourses', label: 'مینی دوره‌ها', numberStr: '۰۷', icon: Sparkles },
+    { id: 'guide', label: 'راهنمای آرمانوین', numberStr: '۰۸', icon: BookOpen },
+    { id: 'account', label: 'حساب کاربری', numberStr: '۰۹', icon: User },
   ];
 
   // =========================================================================
@@ -131,25 +135,30 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile Menu matching image_95e7b2f6.png */}
           {mobileMenuOpen && (
-            <div className="xl:hidden mt-3 pt-3 border-t border-emerald-950/80 animate-fade-in-up">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pb-2">
-                {navTabs.map((tab) => (
+            <div className="xl:hidden mt-3 pt-3 border-t border-emerald-950/80 space-y-2 pb-3 animate-fade-in-up">
+              {navTabs.map((tab) => {
+                const IconComp = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
                   <button
                     key={tab.id}
                     onClick={() => {
                       onSelectTab(tab.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`p-2.5 rounded-xl text-xs font-medium transition ${
-                      activeTab === tab.id ? 'bg-[#0e2420] text-emerald-300 border border-emerald-500/50 font-bold' : 'bg-[#060d0f] text-slate-300'
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition cursor-pointer border ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#0d9488] via-[#0b8a77] to-[#047857] text-white border-[#43C6AC] shadow-[0_0_20px_rgba(13,148,136,0.45)]'
+                        : 'bg-[#051110] text-slate-200 hover:bg-[#0A1F1C] hover:text-white border-[#12302A]'
                     }`}
                   >
-                    {tab.label}
+                    <span className="text-right font-bold">{tab.label}</span>
+                    <IconComp className={`w-4 h-4 shrink-0 mr-2 ${isActive ? 'text-white' : 'text-[#43C6AC]'}`} />
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
           )}
         </div>
