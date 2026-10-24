@@ -34,8 +34,6 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
   // Active Tab in Account Dashboard
   const [activeTab, setActiveTab] = useState<AccountTabId>('dashboard');
 
-  // Mobile Menu Drawer state
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Quick AI in-card prompt state
   const [quickAiQuestion, setQuickAiQuestion] = useState('');
@@ -426,129 +424,33 @@ export const UserAccountDashboard: React.FC<UserAccountDashboardProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* MOBILE ACCOUNT MENU BAR (منطبق بر زبان طراحی کپسولی عکس image_95e7b2f6)  */}
+        {/* FROZEN STICKY TABS BAR (فریز شده در بالای صفحه برای همراهی با اسکرول)       */}
         {/* ========================================================================= */}
-        <div className="lg:hidden space-y-2">
-          {/* Main Trigger Bar: identical aesthetic to the user's mobile menu pills */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="flex-1 p-3 rounded-2xl bg-gradient-to-r from-[#097565] via-[#0b8a77] to-[#047857] text-white text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(9,117,101,0.4)] border border-[#43C6AC]/40 flex items-center justify-between transition cursor-pointer active:scale-[0.98]"
-            >
-              <div className="flex items-center gap-2">
-                <MenuIcon className="w-4 h-4 text-emerald-200" />
-                <span>بخش فعال: {currentTabLabel}</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[11px] font-normal text-emerald-100 bg-black/20 px-2 py-0.5 rounded-lg">
-                <span>تغییر بخش</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </div>
-            </button>
-          </div>
-
-          {/* Quick swipeable horizontal pills on mobile */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
-            {menuItems.slice(0, 6).map((item) => {
+        <div className="lg:hidden sticky top-0 z-30 bg-[#040909]/95 backdrop-blur-md -mx-2.5 px-2.5 sm:-mx-6 sm:px-6 py-2.5 border-b border-[#142824] shadow-xl">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+            {menuItems.map((item) => {
               const isActive = activeTab === item.id;
               const IconComp = item.icon;
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`px-3 py-1.5 rounded-xl whitespace-nowrap flex items-center gap-1.5 transition text-xs cursor-pointer shrink-0 border ${
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`px-3.5 py-2 rounded-xl whitespace-nowrap flex items-center gap-2 transition-all duration-200 text-xs sm:text-[13px] font-medium cursor-pointer shrink-0 border ${
                     isActive
-                      ? 'bg-gradient-to-r from-[#097565] to-[#047857] text-white font-bold border-[#43C6AC]/60 shadow-sm'
-                      : 'bg-[#06100F] text-[#8BA19B] hover:text-white border-[#142824]'
+                      ? 'bg-gradient-to-r from-[#097565] via-[#0b8a77] to-[#047857] text-white font-bold border-[#43C6AC] shadow-[0_0_15px_rgba(9,117,101,0.45)]'
+                      : 'bg-[#06100F] text-[#8BA19B] hover:text-white border-[#142824] hover:bg-[#0C1E1B]'
                   }`}
                 >
-                  <IconComp className="w-3.5 h-3.5" />
+                  <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-[#43C6AC]'}`} />
                   <span>{item.label}</span>
                 </button>
               );
             })}
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="px-2.5 py-1.5 rounded-xl whitespace-nowrap bg-[#06100F] text-[#D4B483] border border-[#D4B483]/30 text-xs shrink-0 flex items-center gap-1"
-            >
-              <span>بیشتر...</span>
-              <ChevronDown className="w-3 h-3" />
-            </button>
           </div>
         </div>
-
-        {/* ========================================================================= */}
-        {/* MOBILE SLIDE-OVER DRAWER (مطابق دقیق با شکل منوی ارسالی در عکس تصویر)    */}
-        {/* ========================================================================= */}
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden flex justify-start bg-black/85 backdrop-blur-md animate-fade-in" dir="rtl">
-            <div className="w-[85%] max-w-[320px] h-full bg-[#030807] border-l border-[#133A33] p-4 flex flex-col justify-between overflow-y-auto shadow-2xl">
-              
-              <div className="space-y-4">
-                {/* Drawer Header */}
-                <div className="flex items-center justify-between border-b border-[#142824] pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#09221E] border border-[#164C42] flex items-center justify-center">
-                      <User className="w-4 h-4 text-[#43C6AC]" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-white block">منوی حساب کاربری</span>
-                      <span className="text-[10px] text-[#8BA19B]">{userData.displayName}</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-8 h-8 rounded-xl bg-[#071312] border border-[#142824] text-slate-300 hover:text-white flex items-center justify-center"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* 11 Navigation Pills styled EXACTLY as image_95e7b2f6.png */}
-                <div className="space-y-2">
-                  {menuItems.map((item) => {
-                    const IconComponent = item.icon;
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          setActiveTab(item.id);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs sm:text-[13px] font-medium transition cursor-pointer border ${
-                          isActive
-                            ? 'bg-gradient-to-r from-[#097565] via-[#0b8a77] to-[#047857] text-white font-bold border-[#43C6AC] shadow-[0_0_20px_rgba(9,117,101,0.5)]'
-                            : 'bg-[#051110] text-slate-200 hover:bg-[#0A1F1C] hover:text-white border-[#12302A]'
-                        }`}
-                      >
-                        <span className="font-bold text-right flex-1">{item.label}</span>
-                        <IconComponent className={`w-4 h-4 shrink-0 mr-2 ${isActive ? 'text-white' : 'text-[#43C6AC]'}`} />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Bottom Logout Buttons */}
-              <div className="pt-4 border-t border-[#142824] space-y-2">
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    if (onLogout) onLogout();
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs text-[#F87171] bg-rose-950/10 border border-rose-900/30 hover:bg-rose-950/20 transition cursor-pointer"
-                >
-                  <span className="font-medium text-right flex-1">خروج از حساب</span>
-                  <LogOut className="w-4 h-4 text-[#F87171]" />
-                </button>
-              </div>
-
-            </div>
-
-            {/* Click outside to close */}
-            <div className="flex-1" onClick={() => setIsMobileMenuOpen(false)} />
-          </div>
-        )}
 
         {/* ========================================================================= */}
         {/* MAIN BODY: 2 COLUMNS (RIGHT MENU ON DESKTOP, BENTO GRID CONTENT ON LEFT)   */}
