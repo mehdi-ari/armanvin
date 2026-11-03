@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information authenticated via Firebase Auth",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the user"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "Profile picture URL"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of account creation"
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "BirthResult": {
+      "title": "BirthResult",
+      "description": "Saved birth time rectification calculation and astrological chart coordinates",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique result identifier"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID"
+        },
+        "birthDate": {
+          "type": "string",
+          "description": "User birth date"
+        },
+        "birthCity": {
+          "type": "string",
+          "description": "Birth city"
+        },
+        "calculatedTime": {
+          "type": "string",
+          "description": "Calculated birth time in HH:mm format"
+        },
+        "ascendant": {
+          "type": "string",
+          "description": "Calculated Ascendant degree and zodiac sign"
+        },
+        "mc": {
+          "type": "string",
+          "description": "Calculated Midheaven (MC) coordinate"
+        },
+        "confidence": {
+          "type": "number",
+          "description": "Confidence percentage score"
+        },
+        "dayPeriod": {
+          "type": "string",
+          "description": "Diurnal or nocturnal period"
+        },
+        "timeOffsetMinutes": {
+          "type": "number",
+          "description": "Fine tuning minute adjustment offset"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of calculation save"
+        }
+      },
+      "required": ["id", "userId", "calculatedTime", "ascendant"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document owned exclusively by the authenticated user"
+    },
+    "/users/{userId}/birth_results/{resultId}": {
+      "schema": "BirthResult",
+      "description": "Birth time calculation history documents belonging exclusively to the authenticated user"
+    }
+  }
+}

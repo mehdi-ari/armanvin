@@ -3,7 +3,7 @@ import {
   Clock, Sparkles, Compass, Check, ChevronLeft, ChevronRight, RotateCcw, 
   MapPin, Calendar, Sun, Moon, Sunrise, Sunset, User, CheckCircle2, 
   Copy, HelpCircle, Activity, ShieldCheck, Flame, Star, Sliders, Zap,
-  Layers, ArrowLeft, ArrowRight, Play, Eye, Brain, Home, LayoutGrid
+  Layers, ArrowLeft, ArrowRight, Play, Eye, Brain, Home, LayoutGrid, Bookmark
 } from 'lucide-react';
 import { 
   RealisticSaturn, 
@@ -22,6 +22,8 @@ import { TemperamentElementsSlide } from './TemperamentElementsSlide';
 import { PsychologySlide } from './PsychologySlide';
 import { SynergySlide } from './SynergySlide';
 import { ArmanveinDashboard } from './ArmanveinDashboard';
+import { auth, signInWithGoogle, saveBirthResult, getUserBirthResults } from '../../lib/firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 
 export const ArmanveinMiniApp: React.FC = () => {
   // Main view mode: 'slides' (Intro 5 slides) | 'dashboard' (Square Grid) | 'birth_calc' (Questionnaire & Result)
@@ -61,6 +63,12 @@ export const ArmanveinMiniApp: React.FC = () => {
   const [selectedPlanetModal, setSelectedPlanetModal] = useState<string | null>(null);
   const [selectedPillar, setSelectedPillar] = useState<'astrology' | 'temperament' | 'psychology' | null>(null);
 
+  // Firebase User & Saved Results State
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+  const [savedResultsCount, setSavedResultsCount] = useState<number>(0);
+  const [isSavingResult, setIsSavingResult] = useState<boolean>(false);
+  const [isResultSaved, setIsResultSaved] = useState<boolean>(false);
+
   // Touch Swipe Gesture State
   const touchStartXRef = useRef<number | null>(null);
   const touchEndXRef = useRef<number | null>(null);
@@ -68,6 +76,83 @@ export const ArmanveinMiniApp: React.FC = () => {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const refreshSavedResults = async (userId?: string) => {
+    const uid = userId || currentUser?.uid;
+    if (!uid) return;
+    try {
+      const results = await getUserBirthResults(uid);
+      setSavedResultsCount(results.length);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Subscribe to Firebase Auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+      if (user) {
+        refreshSavedResults(user.uid);
+      } else {
+        setSavedResultsCount(0);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSaveResult = async () => {
+    if (!currentUser) {
+      try {
+        setIsSavingResult(true);
+        const user = await signInWithGoogle();
+        if (user) {
+          await saveBirthResult(user.uid, {
+            birthDate,
+            birthCity,
+            calculatedTime: calculatedResult.time,
+            ascendant: calculatedResult.ascendant,
+            mc: calculatedResult.mc,
+            confidence: calculatedResult.confidence,
+            dayPeriod: calculatedResult.dayPeriod,
+            timeOffsetMinutes
+          });
+          setIsResultSaved(true);
+          setSavedResultsCount(prev => prev + 1);
+          showToast(`نتیجه ساعت ${calculatedResult.time} در حساب شما ذخیره شد ✨`);
+        }
+      } catch (err: any) {
+        if (err?.code !== 'auth/popup-closed-by-user') {
+          showToast('خطا در ورود یا ذخیره نتیجه');
+        }
+      } finally {
+        setIsSavingResult(false);
+      }
+      return;
+    }
+
+    try {
+      setIsSavingResult(true);
+      await saveBirthResult(currentUser.uid, {
+        birthDate,
+        birthCity,
+        calculatedTime: calculatedResult.time,
+        ascendant: calculatedResult.ascendant,
+        mc: calculatedResult.mc,
+        confidence: calculatedResult.confidence,
+        dayPeriod: calculatedResult.dayPeriod,
+        timeOffsetMinutes
+      });
+      setIsResultSaved(true);
+      setSavedResultsCount(prev => prev + 1);
+      showToast(`نتیجه ساعت ${calculatedResult.time} در فضای ابری ذخیره شد ✨`);
+    } catch (err) {
+      console.error(err);
+      showToast('خطا در ذخیره نتیجه');
+    } finally {
+      setIsSavingResult(false);
+    }
   };
 
   // Keyboard navigation
@@ -519,6 +604,7 @@ export const ArmanveinMiniApp: React.FC = () => {
           onOpenBirthCalculator={() => {
             setViewMode('birth_calc');
             setCalcStep(0);
+            setIsResultSaved(false);
             showToast('ابزار رصد و استخراج ساعت تولد فراخوانی شد');
           }}
           onOpenIntroSlides={() => {
@@ -527,6 +613,9 @@ export const ArmanveinMiniApp: React.FC = () => {
             showToast('اسلایدهای معرفی آکادمی آرمانوین');
           }}
           showToast={showToast}
+          currentUser={currentUser}
+          savedResultsCount={savedResultsCount}
+          onRefreshSavedResults={() => refreshSavedResults()}
         />
       )}
 
@@ -1183,9 +1272,34 @@ export const ArmanveinMiniApp: React.FC = () => {
 
                 {/* Actions */}
                 <div className="space-y-1.5 pt-0.5">
+                  {/* Save to Firebase Button */}
+                  <button
+                    onClick={handleSaveResult}
+                    disabled={isSavingResult || isResultSaved}
+                    className={`w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-98 cursor-pointer ${
+                      isResultSaved
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                        : 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.35)]'
+                    }`}
+                  >
+                    {isResultSaved ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>در پرونده کاربری Firebase ذخیره شد ✓</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark className="w-3.5 h-3.5 text-slate-950" />
+                        <span>
+                          {isSavingResult ? 'در حال ذخیره‌سازی ابری...' : (currentUser ? 'ذخیره در پرونده کاربری (Firebase)' : 'ورود با گوگل و ذخیره دائمی نتیجه')}
+                        </span>
+                      </>
+                    )}
+                  </button>
+
                   <button
                     onClick={handleCopyTime}
-                    className="w-full py-2.5 rounded-xl text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-98 cursor-pointer bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 hover:from-blue-500 hover:to-teal-300 shadow-[0_0_15px_rgba(56,189,248,0.35)]"
+                    className="w-full py-2 rounded-xl text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg active:scale-98 cursor-pointer bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 hover:from-blue-500 hover:to-teal-300 shadow-[0_0_15px_rgba(56,189,248,0.35)]"
                   >
                     {copiedTime ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedTime ? 'ساعت تولد کپی شد!' : `کپی ساعت تولد (${calculatedResult.time})`}</span>

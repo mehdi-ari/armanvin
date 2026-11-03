@@ -1,25 +1,114 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Clock, Sparkles, Compass, Flame, Brain, Calendar, 
   BookOpen, Users, Award, ChevronLeft, ChevronRight, 
   ArrowLeft, CheckCircle2, ShieldCheck, Star, Heart,
-  Activity, Play, Check, X, Sliders, ExternalLink, RefreshCw
+  Activity, Play, Check, X, Sliders, ExternalLink, RefreshCw,
+  LogIn, LogOut, User as UserIcon, Bookmark, Trash2, Copy
 } from 'lucide-react';
+import { 
+  auth, 
+  signInWithGoogle, 
+  logOut, 
+  getUserBirthResults, 
+  deleteBirthResult,
+  SavedBirthResult 
+} from '../../lib/firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 
 interface ArmanveinDashboardProps {
   onOpenBirthCalculator: () => void;
   onOpenIntroSlides: () => void;
   showToast: (msg: string) => void;
+  currentUser: FirebaseUser | null;
+  savedResultsCount: number;
+  onRefreshSavedResults?: () => void;
 }
 
 export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
   onOpenBirthCalculator,
   onOpenIntroSlides,
   showToast,
+  currentUser,
+  savedResultsCount,
+  onRefreshSavedResults
 }) => {
-  // Modal / Drawer state for "خدمات آرمانوین"
+  // Modal / Drawer states
   const [isServicesModalOpen, setIsServicesModalOpen] = useState<boolean>(false);
+  const [isSavedModalOpen, setIsSavedModalOpen] = useState<boolean>(false);
   const [selectedTaskModal, setSelectedTaskModal] = useState<string | null>(null);
+
+  // Auth processing states
+  const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
+  const [savedResults, setSavedResults] = useState<SavedBirthResult[]>([]);
+  const [isLoadingSaved, setIsLoadingSaved] = useState<boolean>(false);
+
+  // Load saved results when modal opens or user changes
+  useEffect(() => {
+    if (currentUser && isSavedModalOpen) {
+      loadUserResults();
+    }
+  }, [currentUser, isSavedModalOpen]);
+
+  const loadUserResults = async () => {
+    if (!currentUser) return;
+    setIsLoadingSaved(true);
+    try {
+      const results = await getUserBirthResults(currentUser.uid);
+      setSavedResults(results);
+    } catch (err) {
+      console.error(err);
+      showToast('خطا در بارگذاری سوابق محاسبات');
+    } finally {
+      setIsLoadingSaved(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsSigningIn(true);
+    try {
+      const user = await signInWithGoogle();
+      showToast(`خوش آمدید ${user.displayName || 'کاربر گرامی'} ✨`);
+      if (onRefreshSavedResults) onRefreshSavedResults();
+    } catch (error: any) {
+      if (error?.code === 'auth/popup-closed-by-user') {
+        showToast('پنجره ورود توسط کاربر بسته شد');
+      } else {
+        showToast('خطا در ورود با گوگل');
+      }
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      setSavedResults([]);
+      showToast('از حساب کاربری خود خارج شدید');
+    } catch (error) {
+      showToast('خطا در خروج از حساب');
+    }
+  };
+
+  const handleDeleteResult = async (resultId: string) => {
+    if (!currentUser) return;
+    try {
+      await deleteBirthResult(currentUser.uid, resultId);
+      setSavedResults(prev => prev.filter(r => r.id !== resultId));
+      showToast('نتیجه با موفقیت از پرونده حذف شد');
+      if (onRefreshSavedResults) onRefreshSavedResults();
+    } catch (err) {
+      showToast('خطا در حذف نتیجه');
+    }
+  };
+
+  const handleCopy = (timeText: string) => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(timeText);
+    }
+    showToast(`ساعت ${timeText} کپی شد`);
+  };
 
   // List of square cards (مربع مربع)
   const squareTasks = [
@@ -35,6 +124,24 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
       tagColor: 'bg-amber-400/20 text-amber-300 border-amber-400/40',
       isPrimary: true,
       onClick: () => setIsServicesModalOpen(true)
+    },
+    {
+      id: 'saved-archive',
+      title: 'پرونده ساعت‌های من',
+      subtitle: currentUser ? `${savedResultsCount} نتیجه ذخیره‌شده` : 'نیازمند ورود با گوگل',
+      icon: Bookmark,
+      color: 'from-blue-500/20 to-indigo-600/10',
+      borderColor: 'border-blue-500/40 hover:border-blue-400',
+      iconBg: 'bg-gradient-to-tr from-blue-500 to-indigo-600 text-white',
+      tag: currentUser ? 'ابری Firebase' : 'ذخیره نتایج',
+      tagColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+      onClick: () => {
+        if (!currentUser) {
+          handleGoogleLogin();
+        } else {
+          setIsSavedModalOpen(true);
+        }
+      }
     },
     {
       id: 'birth-chart-3d',
@@ -77,11 +184,11 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
       title: 'تقویم نجومی و ترانزیت',
       subtitle: 'ساعات سعد و نحس و قمر',
       icon: Calendar,
-      color: 'from-blue-500/20 to-sky-600/10',
-      borderColor: 'border-blue-500/30 hover:border-blue-400/70',
-      iconBg: 'bg-gradient-to-tr from-blue-500 to-sky-500 text-white',
+      color: 'from-teal-500/20 to-cyan-600/10',
+      borderColor: 'border-teal-500/30 hover:border-teal-400/70',
+      iconBg: 'bg-gradient-to-tr from-teal-500 to-cyan-500 text-white',
       tag: 'رصد روزانه',
-      tagColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+      tagColor: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
       onClick: () => setSelectedTaskModal('astrology-calendar')
     },
     {
@@ -95,18 +202,6 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
       tag: 'یادگیری',
       tagColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
       onClick: () => setSelectedTaskModal('academy-courses')
-    },
-    {
-      id: 'personal-evolution',
-      title: 'پرونده توسعه فردی',
-      subtitle: 'عادات روزانه و تمرین‌ها',
-      icon: Activity,
-      color: 'from-teal-500/20 to-emerald-600/10',
-      borderColor: 'border-teal-500/30 hover:border-teal-400/70',
-      iconBg: 'bg-gradient-to-tr from-teal-500 to-emerald-600 text-white',
-      tag: 'رشد فردی',
-      tagColor: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
-      onClick: () => setSelectedTaskModal('personal-evolution')
     },
     {
       id: 'community-webinars',
@@ -128,10 +223,10 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
       id: 'birth-time-finder',
       title: 'پیدا کردن و استخراج ساعت تولد',
       subtitle: 'رصد دقیق زایچه با متد کپلری و ۴ شاخص تطبیقی',
-      description: 'اگر ساعت تولدتان نامشخص است یا در اسناد تردید وجود دارد، هوش نجومی آرمانوین بر اساس بازه شبانه‌روز، فرم فیزیکی، رویدادهای سرنوشت و ریتم کرونوتایپ، دقیق‌ترین ساعت و طالع را استخراج می‌کند.',
+      description: 'اگر ساعت تولدتان نامشخص است یا در اسناد تردید وجود دارد، هوش نجومی آرمانوین بر اساس بازه شبانه‌روز، فرم فیزیکی، رویدادهای سرنوشت و ریتم کرونوتایپ، دقیق‌ترین ساعت و طالع را استخراج می‌کند و قابلیت ذخیره دائمی در Firebase را دارد.',
       icon: Clock,
       highlight: true,
-      badge: 'فعال / کلیک برای شروع',
+      badge: 'فعال / شروع رصد',
       badgeColor: 'bg-amber-400 text-slate-950 font-bold',
       actionText: 'شروع رصد ساعت تولد',
       action: () => {
@@ -194,12 +289,12 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
       <div className="absolute -bottom-16 right-10 w-52 h-52 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
 
       {/* =================================================================== */}
-      {/* TOP HEADER: BRAND, PROFILE, BACK TO SLIDES                          */}
+      {/* TOP HEADER: BRAND, GOOGLE AUTH, PROFILE, BACK TO SLIDES            */}
       {/* =================================================================== */}
       <div className="flex items-center justify-between pb-2 border-b border-white/10 z-10 shrink-0">
         <div className="flex items-center gap-2">
           {/* Logo */}
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500/30 to-yellow-500/10 border border-amber-400/40 p-1 flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-500/30 to-yellow-500/10 border border-amber-400/40 p-1 flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.3)] shrink-0">
             <picture className="w-full h-full flex items-center justify-center">
               <source srcSet="/assets/aistudio/armanvein_logo_optimized.webp" type="image/webp" />
               <img src="/assets/aistudio/__________cfb5adf4.png" alt="نشان آرمانوین" className="w-full h-full object-contain" />
@@ -207,22 +302,74 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h2 className="text-sm font-extrabold text-white font-serif tracking-tight">آرمانوین</h2>
-              <span className="px-1.5 py-0.2 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[8.5px] font-mono">پیشخوان ۳بعدی</span>
+              <h2 className="text-xs sm:text-sm font-extrabold text-white font-serif tracking-tight">آرمانوین</h2>
+              <span className="px-1.5 py-0.2 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[8px] sm:text-[8.5px] font-mono">پیشخوان ۳بعدی</span>
             </div>
-            <span className="text-[9.5px] text-slate-400 block font-mono">ترکیب استرولوژی، مزاج‌شناسی و روانشناسی</span>
+            <span className="text-[9px] text-slate-400 block font-mono">ترکیب استرولوژی، مزاج و روان</span>
           </div>
         </div>
 
-        {/* Action: Revisit Slides */}
-        <button
-          onClick={onOpenIntroSlides}
-          className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-[10px] font-bold transition flex items-center gap-1 cursor-pointer active:scale-95 shadow-sm"
-          title="مشاهده دوباره اسلایدهای معرفی"
-        >
-          <Sparkles className="w-3 h-3 text-amber-400" />
-          <span>اسلایدهای معرفی</span>
-        </button>
+        {/* User Account / Google Sign-In Bar */}
+        <div className="flex items-center gap-1.5">
+          {currentUser ? (
+            /* Logged In State */
+            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2 py-1 backdrop-blur-md">
+              {currentUser.photoURL ? (
+                <img 
+                  src={currentUser.photoURL} 
+                  alt={currentUser.displayName || 'کاربر'} 
+                  className="w-6 h-6 rounded-full border border-amber-400/50 object-cover" 
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center text-[10px] font-bold">
+                  <UserIcon className="w-3.5 h-3.5" />
+                </div>
+              )}
+
+              <div className="hidden xs:block text-right">
+                <span className="text-[9.5px] font-bold text-white block max-w-[70px] truncate">
+                  {currentUser.displayName || 'کاربر گرامی'}
+                </span>
+                <span className="text-[8px] text-emerald-400 block font-mono">تایید گوگل</span>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="w-6 h-6 rounded-lg bg-white/10 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 flex items-center justify-center transition cursor-pointer"
+                title="خروج از حساب"
+              >
+                <LogOut className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            /* Google Sign-In Button */
+            <button
+              onClick={handleGoogleLogin}
+              disabled={isSigningIn}
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-white/10 via-white/5 to-white/10 hover:bg-white/20 text-white border border-white/20 text-[10px] sm:text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-[0_0_12px_rgba(255,255,255,0.08)]"
+              title="ورود با حساب گوگل جهت ذخیره دائمی نتایج"
+            >
+              {/* Colorful Google G Icon */}
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+              </svg>
+              <span>{isSigningIn ? 'در حال ورود...' : 'ورود با گوگل'}</span>
+            </button>
+          )}
+
+          {/* Action: Revisit Slides */}
+          <button
+            onClick={onOpenIntroSlides}
+            className="w-7 h-7 sm:w-auto sm:px-2 sm:py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-sm"
+            title="مشاهده دوباره اسلایدهای معرفی"
+          >
+            <Sparkles className="w-3 h-3 text-amber-400" />
+            <span className="hidden sm:inline">اسلایدها</span>
+          </button>
+        </div>
       </div>
 
       {/* =================================================================== */}
@@ -238,12 +385,26 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
             <span className="text-[9px] text-amber-300">استخراج ساعت تولد برای تدوین چارت کامل</span>
           </div>
         </div>
-        <button 
-          onClick={() => setIsServicesModalOpen(true)}
-          className="px-2 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-[9.5px] font-extrabold transition cursor-pointer shadow-[0_0_10px_rgba(245,158,11,0.3)] shrink-0"
-        >
-          ورود به خدمات
-        </button>
+
+        <div className="flex items-center gap-1.5">
+          {currentUser && (
+            <button 
+              onClick={() => setIsSavedModalOpen(true)}
+              className="px-2 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/40 text-blue-300 text-[9px] font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+              title="مشاهده سوابق محاسبات ساعت تولد"
+            >
+              <Bookmark className="w-3 h-3 text-blue-400" />
+              <span>نتایج ذخیره‌شده ({savedResultsCount})</span>
+            </button>
+          )}
+
+          <button 
+            onClick={() => setIsServicesModalOpen(true)}
+            className="px-2 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-[9.5px] font-extrabold transition cursor-pointer shadow-[0_0_10px_rgba(245,158,11,0.3)] shrink-0"
+          >
+            خدمات
+          </button>
+        </div>
       </div>
 
       {/* =================================================================== */}
@@ -326,7 +487,7 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
       </div>
 
       {/* =================================================================== */}
-      {/* DRAWER / MODAL: خدمات آرمانوین (با آیتم ویژه: پیدا کردن ساعت تولد) */}
+      {/* MODAL 1: خدمات آرمانوین                                             */}
       {/* =================================================================== */}
       {isServicesModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in" dir="rtl">
@@ -420,6 +581,136 @@ export const ArmanveinDashboard: React.FC<ArmanveinDashboardProps> = ({
                 className="w-full py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white text-xs font-bold transition cursor-pointer"
               >
                 بستن پنجره خدمات
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* =================================================================== */}
+      {/* MODAL 2: پرونده ساعت‌های تولد ذخیره‌شده در FIREBASE                */}
+      {/* =================================================================== */}
+      {isSavedModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in" dir="rtl">
+          <div className="w-full max-w-[430px] bg-[#071320] border-t sm:border border-blue-400/40 rounded-t-[28px] sm:rounded-[28px] shadow-[0_0_50px_rgba(59,130,246,0.25)] p-3.5 sm:p-4 text-right max-h-[90vh] overflow-hidden flex flex-col justify-between">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-400/50 flex items-center justify-center text-blue-300 shadow-[0_0_12px_rgba(59,130,246,0.3)]">
+                  <Bookmark className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white font-serif flex items-center gap-1.5">
+                    <span>پرونده ساعت‌های تولد ذخیره‌شده</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                      {savedResults.length} نتیجه
+                    </span>
+                  </h3>
+                  <span className="text-[9.5px] text-slate-400 block font-mono">
+                    همگام‌سازی ابری با حساب کاربری Google و Firebase
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsSavedModalOpen(false)}
+                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Saved Items List */}
+            <div className="flex-1 overflow-y-auto py-2.5 space-y-2 pr-0.5 no-scrollbar min-h-0">
+              {isLoadingSaved ? (
+                <div className="py-8 text-center text-xs text-slate-400 flex flex-col items-center gap-2">
+                  <RefreshCw className="w-5 h-5 animate-spin text-blue-400" />
+                  <span>در حال دریافت نتایج از پایگاه‌داده Firestore...</span>
+                </div>
+              ) : savedResults.length === 0 ? (
+                <div className="py-8 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-400/30 mx-auto flex items-center justify-center text-blue-400">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white">هنوز ساعتی ذخیره نکرده‌اید</h4>
+                    <p className="text-[10px] text-slate-400 mt-1 max-w-[260px] mx-auto leading-relaxed">
+                      از بخش «خدمات آرمانوین» وارد ابزار استخراج ساعت تولد شوید و نتیجه محاسبه را با یک کلیک در حسابتان ذخیره کنید.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsSavedModalOpen(false);
+                      onOpenBirthCalculator();
+                    }}
+                    className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition cursor-pointer"
+                  >
+                    شروع استخراج ساعت تولد
+                  </button>
+                </div>
+              ) : (
+                savedResults.map((result) => (
+                  <div 
+                    key={result.id}
+                    className="p-3 rounded-2xl border border-white/10 bg-white/5 hover:border-blue-400/40 transition-all text-right space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-black font-mono text-cyan-300 dir-ltr">
+                          {result.calculatedTime}
+                        </span>
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-500/30 font-mono">
+                          دقت {result.confidence}٪
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleCopy(result.calculatedTime)}
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+                          title="کپی ساعت"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteResult(result.id)}
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 transition cursor-pointer"
+                          title="حذف از سوابق"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1.5 text-[9.5px]">
+                      <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 space-y-0.5">
+                        <span className="text-slate-400 block font-mono">طالع صاعد (Ascendant):</span>
+                        <span className="text-white font-bold block">{result.ascendant}</span>
+                      </div>
+                      <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 space-y-0.5">
+                        <span className="text-slate-400 block font-mono">تاریخ و شهر:</span>
+                        <span className="text-slate-200 font-bold block">{result.birthCity} · {result.birthDate}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[8px] text-slate-400 font-mono pt-1 border-t border-white/5">
+                      <span>بازه: {result.dayPeriod}</span>
+                      <span>ثبت: {result.createdAt ? new Date(result.createdAt).toLocaleDateString('fa-IR') : 'به‌تازگی'}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Bottom Close */}
+            <div className="pt-2 border-t border-white/10 shrink-0">
+              <button
+                onClick={() => setIsSavedModalOpen(false)}
+                className="w-full py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white text-xs font-bold transition cursor-pointer"
+              >
+                بستن پنجره پرونده
               </button>
             </div>
 
