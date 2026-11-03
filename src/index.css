@@ -1,0 +1,676 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    font-family: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.015em;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Global smooth scrolling utility */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Cyber Cyan custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(4, 12, 14, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.8);
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* Audio waveform animated bars */
+@keyframes waveBar {
+  0%, 100% { height: 25%; }
+  50% { height: 95%; }
+}
+
+.animate-wave-bar {
+  animation: waveBar 0.8s ease-in-out infinite;
+}
+
+/* Smooth fade-in-up entrance animation using CSS keyframes */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Stagger delay utilities */
+.animate-delay-1 { animation-delay: 80ms; }
+.animate-delay-2 { animation-delay: 160ms; }
+.animate-delay-3 { animation-delay: 260ms; }
+.animate-delay-4 { animation-delay: 380ms; }
+.animate-delay-5 { animation-delay: 500ms; }
+
+/* Lightweight 3D Slide Transition Keyframes (Hardware Accelerated & GPU Optimized) */
+@keyframes slideInLightNext {
+  0% {
+    opacity: 0.45;
+    transform: rotateY(-8deg) translate3d(24px, 0, 30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg) translate3d(0, 0, 60px) scale(1.05);
+  }
+}
+
+@keyframes slideInLightPrev {
+  0% {
+    opacity: 0.45;
+    transform: rotateY(8deg) translate3d(-24px, 0, 30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg) translate3d(0, 0, 60px) scale(1.05);
+  }
+}
+
+@keyframes sideCardNudge {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 0.65;
+    transform: scale(0.90);
+  }
+}
+
+.animate-slide-light-next {
+  animation: slideInLightNext 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-slide-light-prev {
+  animation: slideInLightPrev 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-side-card {
+  animation: sideCardNudge 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+/* Subtle cyber cyan neon glow pulse for active slide */
+@keyframes cyberCyanPulse {
+  0%, 100% {
+    box-shadow: 0 0 35px rgba(6, 182, 212, 0.35), inset 0 0 15px rgba(6, 182, 212, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(6, 182, 212, 0.55), inset 0 0 25px rgba(6, 182, 212, 0.2);
+  }
+}
+
+.cyber-card-glow {
+  animation: cyberCyanPulse 3.5s ease-in-out infinite;
+}
+
+/* Scroll reveal transition utilities */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(24px);
+  will-change: opacity, transform;
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Gentle floating animation */
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.6deg);
+  }
+}
+
+@keyframes floatGentleReverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(7px) rotate(-0.6deg);
+  }
+}
+
+.animate-float {
+  animation: floatGentle 5s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: floatGentleReverse 6.5s ease-in-out 1s infinite;
+}
+
+.animate-float-delayed {
+  animation: floatGentle 5.8s ease-in-out 2s infinite;
+}
+
+/* Cyber Cyan Scanline & Shimmer Sweep for in-place section transitions */
+@keyframes cyberScanline {
+  0% {
+    top: -10%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    top: 110%;
+    opacity: 0;
+  }
+}
+
+.animate-cyber-scanline {
+  animation: cyberScanline 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: top, opacity;
+}
+
+/* Smooth in-place text replacement animation */
+@keyframes contentSwapIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.995);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-content-swap {
+  animation: contentSwapIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity, filter;
+}
+
+/* Sliding Sidebar Drawer animations */
+@keyframes slideDrawerIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-drawer-in {
+  animation: slideDrawerIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-content-swap,
+  .animate-cyber-scanline,
+  .animate-drawer-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* Glassmorphism & Gold Auric Glow Effects */
+.glass-panel {
+  background: rgba(13, 18, 34, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-gold {
+  background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.08), transparent 60%), rgba(11, 16, 30, 0.85);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+}
+
+.gold-glow {
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+}
+
+.gold-glow-hover:hover {
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.38);
+}
+
+.purple-glow {
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.35);
+}
+
+@keyframes shimmerGlint {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(250%) skewX(-20deg); }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  transform: translateX(-100%);
+  animation: shimmerGlint 4s infinite;
+}
+
+/* Subtle Cyber-Glow border and ambient lighting effect for interactive activity cards */
+.cyber-glow-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cyber-glow-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(67, 198, 172, 0.45), rgba(212, 180, 131, 0.25), rgba(9, 117, 101, 0.45));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.cyber-glow-card:hover::after {
+  opacity: 1;
+}
+
+.cyber-glow-card:hover {
+  border-color: rgba(67, 198, 172, 0.5);
+  box-shadow: 0 0 22px rgba(67, 198, 172, 0.16), 0 8px 30px rgba(0, 0, 0, 0.55);
+  transform: translateY(-2px);
+}
+
+/* Celestial Onboarding Animations */
+@keyframes celestialFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-celestial-float {
+  animation: celestialFloat 4.5s ease-in-out infinite;
+}
+
+@keyframes twinkleSparkle {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.animate-twinkle {
+  animation: twinkleSparkle 2.4s ease-in-out infinite;
+}
+
+@keyframes moonAuraPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.5)) drop-shadow(0 0 25px rgba(245, 158, 11, 0.25));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 22px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 45px rgba(245, 158, 11, 0.45));
+    transform: scale(1.04);
+  }
+}
+
+.animate-moon-aura {
+  animation: moonAuraPulse 3.8s ease-in-out infinite;
+}
+
+@keyframes cosmicRingSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-cosmic-spin {
+  animation: cosmicRingSpin 80s linear infinite;
+}
+
+/* Authentic Bottom-Up Construction Animation for Logo (ساخته شدن لوگو از پایین به بالا) */
+@keyframes logoBuildFromBottom {
+  0% {
+    opacity: 0;
+    clip-path: inset(100% 0% 0% 0%);
+    transform: translateY(28px) scale(0.92);
+    filter: drop-shadow(0 0 0px transparent);
+  }
+  35% {
+    opacity: 0.85;
+  }
+  75% {
+    clip-path: inset(0% 0% 0% 0%);
+    transform: translateY(0px) scale(1.03);
+    filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.45));
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0% 0% 0% 0%);
+    transform: translateY(0px) scale(1);
+    filter: drop-shadow(0 6px 20px rgba(16, 185, 129, 0.3));
+  }
+}
+
+.animate-logo-build {
+  animation: logoBuildFromBottom 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Continuous smooth floating for the logo (بدون هیچ حاشیه، کادر یا خط برش مصنوعی) */
+@keyframes celestialLogoFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.02);
+  }
+}
+
+.animate-logo-float {
+  animation: celestialLogoFloat 4.2s ease-in-out infinite;
+}
+
+/* ========================================================================= */
+/* 4 CLASSICAL ELEMENTS ANIMATIONS (مزاج‌شناسی و طبایع چهارگانه)             */
+/* ========================================================================= */
+
+/* 1. Earth (خاک) - Leaves swaying & rustling (تکان خوردن برگ‌ها) */
+@keyframes leavesSway {
+  0%, 100% {
+    transform: rotate(0deg) skewX(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(2deg) skewX(1deg) scale(1.01) translateY(-1px);
+  }
+  50% {
+    transform: rotate(0deg) skewX(0deg) scale(1);
+  }
+  75% {
+    transform: rotate(-2.5deg) skewX(-1.2deg) scale(1.01) translateY(0.5px);
+  }
+}
+
+.animate-leaves-sway {
+  animation: leavesSway 3.6s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Floating spores / leaves */
+@keyframes floatPollen {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0) scale(0.6);
+  }
+  30% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px) translateX(8px) scale(1);
+  }
+}
+
+.animate-pollen-1 {
+  animation: floatPollen 3.2s ease-in-out infinite;
+}
+.animate-pollen-2 {
+  animation: floatPollen 4.1s ease-in-out 1.2s infinite;
+}
+.animate-pollen-3 {
+  animation: floatPollen 3.7s ease-in-out 2s infinite;
+}
+
+/* 2. Fire (آتش) - Flickering flame & rising sparks/embers (دود و جرقه آتش) */
+@keyframes flameFlicker {
+  0%, 100% {
+    transform: scaleY(1) scaleX(1);
+    filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.65)) drop-shadow(0 0 25px rgba(239, 68, 68, 0.35));
+  }
+  25% {
+    transform: scaleY(1.05) scaleX(0.97) skewX(-1deg);
+    filter: drop-shadow(0 0 16px rgba(249, 115, 22, 0.85)) drop-shadow(0 0 32px rgba(239, 68, 68, 0.5));
+  }
+  50% {
+    transform: scaleY(0.97) scaleX(1.02) skewX(1deg);
+    filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.6)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.3));
+  }
+  75% {
+    transform: scaleY(1.03) scaleX(0.98);
+    filter: drop-shadow(0 0 18px rgba(249, 115, 22, 0.9)) drop-shadow(0 0 35px rgba(239, 68, 68, 0.55));
+  }
+}
+
+.animate-flame-flicker {
+  animation: flameFlicker 2.2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Rising Fire Sparks / Embers */
+@keyframes fireSparks {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0) scale(0.4);
+  }
+  20% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-42px) translateX(var(--drift-x, 8px)) scale(0.15);
+  }
+}
+
+.animate-spark-1 {
+  --drift-x: 6px;
+  animation: fireSparks 1.8s ease-out infinite;
+}
+.animate-spark-2 {
+  --drift-x: -8px;
+  animation: fireSparks 2.3s ease-out 0.6s infinite;
+}
+.animate-spark-3 {
+  --drift-x: 10px;
+  animation: fireSparks 2s ease-out 1.2s infinite;
+}
+.animate-spark-4 {
+  --drift-x: -5px;
+  animation: fireSparks 2.5s ease-out 0.3s infinite;
+}
+
+/* Rising Smoke from Fire */
+@keyframes fireSmoke {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6) rotate(0deg);
+  }
+  30% {
+    opacity: 0.45;
+  }
+  80% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-38px) scale(1.6) rotate(15deg);
+  }
+}
+
+.animate-smoke-1 {
+  animation: fireSmoke 3.4s ease-out infinite;
+}
+.animate-smoke-2 {
+  animation: fireSmoke 3.9s ease-out 1.6s infinite;
+}
+
+/* 3. Air / Wind (باد و هوا) - Swirling vortex & wind stream (حرکت باد و گردباد) */
+@keyframes windSwirl {
+  0%, 100% {
+    transform: scaleX(1) scaleY(1) rotate(0deg);
+    filter: drop-shadow(0 0 10px rgba(186, 230, 253, 0.4));
+  }
+  33% {
+    transform: scaleX(1.06) scaleY(0.97) rotate(2deg) skewY(1.5deg);
+    filter: drop-shadow(0 0 16px rgba(186, 230, 253, 0.65));
+  }
+  66% {
+    transform: scaleX(0.95) scaleY(1.04) rotate(-2deg) skewY(-1.5deg);
+    filter: drop-shadow(0 0 12px rgba(186, 230, 253, 0.5));
+  }
+}
+
+.animate-wind-swirl {
+  animation: windSwirl 3.2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* Wind stream line rotation */
+@keyframes windRingTurn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-wind-ring {
+  animation: windRingTurn 12s linear infinite;
+}
+.animate-wind-ring-rev {
+  animation: windRingTurn 16s linear infinite reverse;
+}
+
+/* 4. Water (آب) - Surging wave & splash droplets (موج آب و پاشش قطرات) */
+@keyframes waveSurge {
+  0%, 100% {
+    transform: translateY(0px) scaleX(1) scaleY(1);
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45)) drop-shadow(0 0 20px rgba(14, 165, 233, 0.25));
+  }
+  35% {
+    transform: translateY(-2.5px) scaleX(1.03) scaleY(1.02);
+    filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.75)) drop-shadow(0 0 30px rgba(14, 165, 233, 0.45));
+  }
+  70% {
+    transform: translateY(1.5px) scaleX(0.98) scaleY(0.99);
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.35));
+  }
+}
+
+.animate-wave-surge {
+  animation: waveSurge 2.8s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Splash Droplets */
+@keyframes waterSplash {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(var(--splash-x, 6px), -12px) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--splash-x, 6px) * 1.6), 8px) scale(0.2);
+  }
+}
+
+.animate-splash-1 {
+  --splash-x: 7px;
+  animation: waterSplash 2.1s ease-out infinite;
+}
+.animate-splash-2 {
+  --splash-x: -8px;
+  animation: waterSplash 2.6s ease-out 0.7s infinite;
+}
+.animate-splash-3 {
+  --splash-x: 10px;
+  animation: waterSplash 2.3s ease-out 1.4s infinite;
+}
+
+/* Slow cosmic dial rotation for the elements background ring */
+@keyframes elementalDialSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-elemental-dial {
+  animation: elementalDialSpin 60s linear infinite;
+}
+
+
+
+

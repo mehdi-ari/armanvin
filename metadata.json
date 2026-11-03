@@ -1,0 +1,6 @@
+{
+  "name": "آزمایشگاه طراحی و انیمیشن پکیج‌های آرمانوین",
+  "description": "نمونه‌های تعاملی طرح، جای‌گذاری و انیمیشن‌های سبک بخش خدمات و پکیج‌های آرمانوین برای دسکتاپ و موبایل",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
